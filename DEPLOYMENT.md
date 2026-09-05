@@ -34,7 +34,7 @@ Ce document décrit comment Forge est construit, signé, distribué et opéré. 
 Appels sortants HTTPS depuis "app" (jamais depuis "wear" directement) :
   → Health Connect (API on-device, pas de réseau)
   → Gemini API           (job hebdo WorkManager, données agrégées uniquement)
-  → Google Calendar API  (OAuth natif Android, écriture d'événements)
+  → Agenda du système    (CalendarContract, écriture locale — voir §9)
   → Webhook Alexa        (Notify-My-Alexa / IFTTT — voir §11)
   → Deepgram API         (Phase 2 uniquement, hors MVP)
 ```
@@ -57,7 +57,8 @@ Aucun de ces appels ne transite par un serveur possédé par le projet : Forge p
 - **Local (dev)** : `local.properties` (jamais commit — couvert par le `.gitignore` créé en Phase 0), lu par Gradle et exposé via `BuildConfig` :
   - `GEMINI_API_KEY` (module `core-ai`)
   - `DEEPGRAM_API_KEY` (module `core-ai` ; réservé, non consommé avant la Phase 2 produit)
-  - `GOOGLE_CALENDAR_OAUTH_CLIENT_ID` (module `core-sync`)
+
+  L'agenda n'a besoin d'aucune clé : `core-sync` passe par le fournisseur du système (§9).
 - `local.properties.example` committé (sans valeurs réelles) pour documenter les clés attendues à toute personne qui clone le repo.
 - **CI** : les mêmes clés sont stockées comme secrets GitHub Actions chiffrés, injectées en variables d'environnement au moment du job — jamais affichées dans les logs. Chaque clé est lue d'abord dans `local.properties`, puis dans l'environnement : le poste de dev et la CI utilisent donc le même code de build sans fichier généré à la volée.
 - **Une clé absente ne casse pas le build** : elle produit une chaîne vide dans `BuildConfig`, ce qui permet à la CI de compiler les six modules sans secret. L'échec devient alors explicite à l'exécution de l'appel réseau, là où il est diagnosticable, plutôt qu'à la compilation.
@@ -70,7 +71,7 @@ Aucun de ces appels ne transite par un serveur possédé par le projet : Forge p
 - Un keystore de release unique, généré une fois, conservé hors du repo (gestionnaire de mots de passe ou coffre chiffré local) — jamais dans Git, même chiffré, sauf si explicitement voulu et documenté comme tel.
 - Pour les builds locaux de dev : keystore de debug par défaut d'Android Studio, suffisant tant que l'app n'est pas distribuée hors des appareils de test.
 - Pour les builds CI de release : keystore encodé en base64 + mot de passe + alias stockés comme secrets GitHub Actions, décodés dans le job juste avant `assembleRelease`/`bundleRelease`.
-- Le SHA-1 du certificat de release (et celui de debug, pour le développement) doit être enregistré côté Google Cloud Console pour que l'OAuth Calendar fonctionne sur les deux variantes de build (§10).
+- Aucune empreinte SHA-1 à enregistrer chez Google : l'agenda passe par le fournisseur du système et Gemini s'authentifie par clé d'API, pas par certificat d'application (§9, §10).
 
 ---
 
@@ -111,23 +112,33 @@ Pas de déploiement serveur à orchestrer — le pipeline se limite à build/tes
 |---|---|---|---|
 | `app` | Health Connect (on-device, pas de réseau) | Rappel programmé (pas de polling) | — |
 | `app` | Gemini API | Job `WorkManager` hebdomadaire | Séries agrégées (moyennes, deltas de charge, compteurs) — jamais un export brut identifiant, conformément à `SPEC.md` §3/§8 |
-| `app` | Google Calendar API | Onboarding (création) + éventuelles mises à jour | Métadonnées d'événements (titres, horaires récurrents) |
+| `app` | Agenda du système (on-device, pas de réseau) | Onboarding (création) | Métadonnées d'événements (titres, horaires récurrents) — la remontée vers Google Calendar est faite par la synchronisation du compte, pas par Forge |
 | `app` | Webhook Alexa (Notify-My-Alexa/IFTTT) | Rappels programmés + transitions `RETARD_2`/`CRITIQUE` | Texte du message vocal à relayer |
 | `app` | Deepgram API | Phase 2 uniquement | `audio_script` textuel → flux audio |
 | `wear` | — | — | Aucun appel réseau direct ; passe par `app` via la Data Layer API |
 
 ---
 
-## 9. OAuth Google Calendar
+## 9. Agenda — pas d'OAuth
 
-- Créer un projet Google Cloud dédié (à faire par l'utilisateur, compte Google personnel — décision hors du code).
-- Écran de consentement OAuth en mode "Test" (suffisant pour un usage mono-utilisateur, pas besoin de validation Google).
-- Client OAuth de type **Android** (pas "Web"), lié au nom de package de l'app + empreintes SHA-1 debug **et** release (§5) — ce flux n'utilise pas de client secret côté app.
-- Scope minimal : écriture d'événements (`calendar.events`), pas d'accès lecture large à l'agenda existant au-delà de ce qui est nécessaire pour éviter les doublons à l'onboarding.
+**Écart assumé par rapport à `SPEC.md` §3**, qui prévoyait l'API Google Calendar en OAuth : `core-sync` écrit via le fournisseur `CalendarContract` d'Android.
+
+| | API Calendar en OAuth | `CalendarContract` (retenu) |
+|---|---|---|
+| Mise en place | Projet Google Cloud, écran de consentement, client Android, empreintes SHA-1 debug **et** release | Deux permissions déclarées dans le manifeste |
+| Fonctionnement hors ligne | Non — jeton à rafraîchir | Oui, l'écriture est locale |
+| Remontée dans Google Calendar | Directe | Par la synchronisation du compte Google du téléphone |
+| Dépendances | Bibliothèques Google API (~2 Mo) | Aucune, le fournisseur fait partie du SDK |
+
+Pour une app mono-utilisateur installée sur un téléphone déjà connecté à son compte Google, le second chemin donne le même résultat visible — le programme apparaît dans l'agenda consulté tous les jours — sans provisionnement externe.
+
+**Quand revenir à OAuth** : si l'on veut écrire dans un agenda auquel le téléphone n'est pas connecté, ou lire/modifier des événements créés ailleurs. Le code est isolé derrière l'interface `CalendarSync`, donc le changement reste local à une classe.
+
+**Conséquence** : plus de `GOOGLE_CALENDAR_OAUTH_CLIENT_ID` dans `local.properties` ni dans `BuildConfig`.
 
 ---
 
-## 10. OAuth / clés Gemini
+## 10. Clé d'API Gemini
 
 - Clé API Gemini généré depuis Google AI Studio ou Google Cloud (selon le produit choisi par l'utilisateur), stockée uniquement via `local.properties`/secrets CI (§4).
 - Aucune rotation automatisée nécessaire vu le volume d'appels (un job par semaine) — rotation manuelle en cas de suspicion de fuite.
@@ -174,7 +185,9 @@ Ce choix engage un compte externe et une URL de webhook à traiter comme un secr
 
 Ces points ont un impact structurant sur l'architecture de déploiement et ne sont pas tranchés par `SPEC.md` — ne pas les combler par un choix par défaut :
 
-1. **Canal de distribution** (§6) : ADB uniquement pour l'instant, ou mise en place immédiate de la piste de test interne Play Console ?
-2. **Fournisseur du relais Alexa** (§11) : Notify-My-Alexa ou IFTTT ?
-3. **Mise en place de la CI GitHub Actions** (§7) : dès la Phase 0, ou après un premier prototype local fonctionnel ?
+1. **Chemin d'accès à l'agenda** (§9) : `CalendarContract` retenu à la phase 4 à la place de l'OAuth prévu par `SPEC.md` §3 — à confirmer ou à annuler.
+2. **Fournisseur du relais Alexa** (§11) : Notify-My-Alexa ou IFTTT ? Tant que la question est ouverte, `UnconfiguredVoiceRelay` journalise ce qui aurait été annoncé ; le brancher se réduit à une ligne de liaison Hilt.
+3. **Canal de distribution** (§6) : ADB uniquement pour l'instant, ou mise en place immédiate de la piste de test interne Play Console ?
 4. **Stratégie de migration Room** (§13) : accepter une stratégie destructive tant que l'usage reste expérimental, ou exiger des migrations réelles dès la première version installée avec des données réelles ?
+
+La mise en place de la CI, précédemment listée ici, est tranchée : elle tourne depuis la phase 0.

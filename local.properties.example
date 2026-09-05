@@ -13,5 +13,5 @@ GEMINI_API_KEY=
 # Voix Aura/Nova (SPEC.md §9, phase 2) — déclarée maintenant, non consommée avant la phase vocale
 DEEPGRAM_API_KEY=
 
-# OAuth Google Calendar, client de type Android (DEPLOYMENT.md §9) — consommé par core-sync
-GOOGLE_CALENDAR_OAUTH_CLIENT_ID=
+# Aucune clé pour l'agenda : core-sync écrit via le fournisseur CalendarContract du système,
+# sans OAuth ni projet Google Cloud (DEPLOYMENT.md §9).

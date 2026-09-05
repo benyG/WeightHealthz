@@ -82,13 +82,19 @@ Aucune UI, aucune persistance réelle avant que ces règles existent et soient t
 
 ## 5. Phase 3 — `core-ai` : client Gemini (texte, MVP) + scaffolding Deepgram
 
-- [ ] Client HTTP (Retrofit ou Ktor) vers l'API Gemini, function calling activé, prompt structuré de `SPEC.md` §6.1.
-- [ ] Validation stricte du JSON retourné côté app : `kcal_adjustment` rejeté/tronqué s'il sort de [-300, +300] — Gemini ne peut jamais imposer un ajustement hors des règles de `core-domain` (garde-fou `SPEC.md` §6.3).
-- [ ] Job `WorkManager` du dimanche : compile la semaine (poids, séances, adhérence) depuis `core-data`, appelle Gemini, persiste `WeeklyAnalysis` — jamais d'appel bloquant l'UI.
-- [ ] `audio_script` stocké comme champ texte dans `WeeklyAnalysis` mais **non envoyé à Deepgram en MVP** — le pipeline TTS est Phase 2/8. Ne pas câbler Deepgram ici pour éviter du code mort en attendant la phase vocale.
-- [ ] Rejeu différé : si le job échoue par absence réseau, WorkManager le retente à la reconnexion (contrainte réseau sur le `WorkRequest`).
+- [x] Client HTTP (Retrofit ou Ktor) vers l'API Gemini, function calling activé, prompt structuré de `SPEC.md` §6.1.
+- [x] Validation stricte du JSON retourné côté app : `kcal_adjustment` rejeté/tronqué s'il sort de [-300, +300] — Gemini ne peut jamais imposer un ajustement hors des règles de `core-domain` (garde-fou `SPEC.md` §6.3).
+- [x] Job `WorkManager` du dimanche : compile la semaine (poids, séances, adhérence) depuis `core-data`, appelle Gemini, persiste `WeeklyAnalysis` — jamais d'appel bloquant l'UI.
+- [x] `audio_script` stocké comme champ texte dans `WeeklyAnalysis` mais **non envoyé à Deepgram en MVP** — le pipeline TTS est Phase 2/8. Ne pas câbler Deepgram ici pour éviter du code mort en attendant la phase vocale.
+- [x] Rejeu différé : si le job échoue par absence réseau, WorkManager le retente à la reconnexion (contrainte réseau sur le `WorkRequest`).
 
 **Définition de fini** : un `WeeklyAnalysis` complet et borné est produit chaque dimanche (ou à la demande en debug), consultable en base, sans appel réseau synchrone depuis l'UI.
+
+**Deux écarts assumés, à confirmer** :
+- *Sortie structurée plutôt que function calling* : `SPEC.md` §3 évoque le function calling, mais §6.1 demande un JSON conforme à un contrat, pas un outil de l'app invoqué par le modèle. Le `responseSchema` de Gemini est le mécanisme fait pour ça, et le schéma reprend littéralement le contrat de §6.1.
+- *Garde-fou plus strict que la lettre de §6.3* : borner à ±300 ne suffit pas, un modèle qui renvoie 150 kcal reste dans les bornes tout en ayant inventé une règle. L'ajustement enregistré est donc toujours celui des règles du plan ; celui du modèle est borné, comparé, et le désaccord journalisé. Le prompt annonce le chiffre calculé pour que le résumé ne le contredise pas.
+
+**Reporté en phase 5** : la planification du job (WorkManager) et la date de début de programme saisie à l'onboarding — l'index de semaine se déduit pour l'instant du premier import du plan.
 
 ---
 

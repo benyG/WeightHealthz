@@ -100,12 +100,22 @@ Aucune UI, aucune persistance réelle avant que ces règles existent et soient t
 
 ## 6. Phase 4 — `core-sync` : Google Calendar + relais Alexa
 
-- [ ] OAuth Google Calendar (flux natif Android, pas de client secret côté app) — création d'événements récurrents séances/repas à l'onboarding, écriture idempotente (ne pas recréer les événements si l'onboarding est relancé).
-- [ ] Client webhook Alexa (relais type Notify-My-Alexa/IFTTT, pas de skill Alexa custom — `SPEC.md` §5.8) — voir `DEPLOYMENT.md` §11 pour le choix de fournisseur, à trancher avec l'utilisateur avant implémentation.
-- [ ] `core-sync` s'abonne aux événements de la machine d'escalade de `core-domain` (ex. `Flow<EscalationEvent>`) plutôt que de dupliquer la logique d'état — c'est `core-domain` qui décide des transitions, `core-sync` ne fait que réagir à `RETARD_2`/`CRITIQUE`.
-- [ ] Rappels programmés (repas/séance à heure fixe) relayés vers Alexa en plus de la notification Android, pas en remplacement.
+Livrée en deux temps, le fournisseur du relais vocal n'étant pas tranché.
 
-**Définition de fini** : un événement de test `RETARD_2`/`CRITIQUE` émis par `core-domain` déclenche un appel webhook observable (log/mock en test), et un onboarding de test crée les événements Calendar attendus sans doublon sur ré-exécution.
+**Temps 1 — fait**
+
+- [x] Écriture des événements séances/repas dans l'agenda à l'onboarding, idempotente (marquage `CUSTOM_APP_PACKAGE`/`CUSTOM_APP_URI` : relancer l'onboarding constate les événements déjà posés au lieu d'en créer d'autres).
+- [x] `core-sync` réagit aux événements de la machine d'escalade de `core-domain` sans dupliquer la logique d'état : c'est `EscalationLevel.requiresVoiceRelay` qui décide, ici on ne fait qu'obéir.
+- [x] Interface `VoiceRelay` et logique de relais, testées ; rappels programmés relayés **en plus** de la notification Android, pas à sa place.
+- [x] Messages d'escalade partagés avec les autres canaux (`EscalationMessage` dans `core-domain`), avec un test qui vérifie que le texte vocal est exactement celui de la notification — `DESIGN.md` §9 exige le même vocabulaire partout.
+
+**Écart assumé** : l'agenda passe par `CalendarContract` et non par l'API Google Calendar en OAuth prévue par `SPEC.md` §3. Comparatif, justification et condition de retour en arrière dans `DEPLOYMENT.md` §9. Isolé derrière `CalendarSync`, donc réversible en une classe.
+
+**Temps 2 — en attente d'une décision**
+
+- [ ] Client webhook du relais vocal, une fois le fournisseur choisi (Notify-My-Alexa ou IFTTT, `DEPLOYMENT.md` §11). En attendant, `UnconfiguredVoiceRelay` journalise ce qui aurait été annoncé — le brancher se réduira à une ligne dans `SyncModule`, tout le reste de l'app parlant déjà à l'interface.
+
+**Définition de fini** : atteinte pour l'agenda. Pour la voix, l'interface et la logique sont vérifiées ; seul l'appel réseau réel manque.
 
 ---
 

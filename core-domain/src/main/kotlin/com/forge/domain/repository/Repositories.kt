@@ -40,6 +40,9 @@ interface WorkoutRepository {
 
     /** Séances contenant [exerciseName], depuis [since] — matière première de la stagnation. */
     suspend fun historyFor(exerciseName: String, since: LocalDate): List<WorkoutSession>
+
+    /** Séances sur une période, bornes incluses — matière première de l'analyse hebdomadaire. */
+    suspend fun sessionsBetween(from: LocalDate, to: LocalDate): List<WorkoutSession>
 }
 
 interface AdherenceRepository {
@@ -56,4 +59,13 @@ interface WeeklyAnalysisRepository {
 
 interface PlanRepository {
     suspend fun targetForWeek(weekIndex: Int): PlanTarget?
+
+    /** Séances prévues par semaine — dénominateur du "séances complétées / planifiées". */
+    suspend fun plannedSessionsPerWeek(): Int
+
+    /**
+     * Début du programme, d'où se déduit l'index de la semaine en cours. `null` tant qu'aucun
+     * plan n'est importé — l'analyse hebdomadaire n'a alors rien à analyser.
+     */
+    suspend fun programStartDate(): LocalDate?
 }

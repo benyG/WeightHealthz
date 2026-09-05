@@ -54,14 +54,13 @@ Aucun de ces appels ne transite par un serveur possédé par le projet : Forge p
 
 ## 4. Gestion des secrets et de la configuration
 
-- **Local (dev)** : `local.properties` (jamais commit — voir correction ci-dessous), lu par Gradle et exposé via `BuildConfig` :
-  - `GEMINI_API_KEY`
-  - `DEEPGRAM_API_KEY` (réservé, non consommé avant la Phase 2 produit)
-  - `GOOGLE_CALENDAR_OAUTH_CLIENT_ID`
+- **Local (dev)** : `local.properties` (jamais commit — couvert par le `.gitignore` créé en Phase 0), lu par Gradle et exposé via `BuildConfig` :
+  - `GEMINI_API_KEY` (module `core-ai`)
+  - `DEEPGRAM_API_KEY` (module `core-ai` ; réservé, non consommé avant la Phase 2 produit)
+  - `GOOGLE_CALENDAR_OAUTH_CLIENT_ID` (module `core-sync`)
 - `local.properties.example` committé (sans valeurs réelles) pour documenter les clés attendues à toute personne qui clone le repo.
-
-  **Correction à apporter dès la Phase 0** : `SPEC.md` §8 et `CLAUDE.md` indiquent que `local.properties` est "déjà dans le `.gitignore`" — **il n'existe actuellement aucun `.gitignore` dans ce repo**. Tant que ce fichier n'est pas créé, toute clé écrite dans `local.properties` par erreur serait committable. Premier item de `IMPLEMENTATION_PLAN.md` Phase 0.
-- **CI** : les mêmes clés sont stockées comme secrets GitHub Actions chiffrés (repo ou organisation), injectées en variables d'environnement au moment du job, puis écrites dans un `local.properties` généré à la volée — jamais affichées dans les logs (`::add-mask::` côté Actions ou équivalent).
+- **CI** : les mêmes clés sont stockées comme secrets GitHub Actions chiffrés, injectées en variables d'environnement au moment du job — jamais affichées dans les logs. Chaque clé est lue d'abord dans `local.properties`, puis dans l'environnement : le poste de dev et la CI utilisent donc le même code de build sans fichier généré à la volée.
+- **Une clé absente ne casse pas le build** : elle produit une chaîne vide dans `BuildConfig`, ce qui permet à la CI de compiler les six modules sans secret. L'échec devient alors explicite à l'exécution de l'appel réseau, là où il est diagnosticable, plutôt qu'à la compilation.
 - Aucune clé n'est jamais codée en dur dans le code source, quel que soit le module.
 
 ---
@@ -144,7 +143,7 @@ Pas de déploiement serveur à orchestrer — le pipeline se limite à build/tes
 | **Notify-My-Alexa** | Service tiers dédié à la notification vocale Alexa via une simple requête HTTP | Dépendance à la disponibilité continue d'un service tiers de niche |
 | **IFTTT Applet** | Webhook IFTTT → action Alexa "Annoncer" | Compte IFTTT (gratuit avec limites, ou payant selon le nombre d'automatisations actives) |
 
-Ce choix engage un compte externe et une URL de webhook à conserver comme secret (`ALEXA_WEBHOOK_URL` dans `local.properties`, jamais en dur) — **à trancher avec l'utilisateur avant d'implémenter `core-sync`** (Phase 4 de `IMPLEMENTATION_PLAN.md`), conformément à `CLAUDE.md` §"Quand demander plutôt que supposer".
+Ce choix engage un compte externe et une URL de webhook à traiter comme un secret. Contrairement aux clés API du §4, cette URL n'est **pas** dans `BuildConfig` : elle est saisie à l'onboarding (`SPEC.md` §5.1) et stockée dans les préférences de l'app — elle peut ainsi changer sans rebuild et ne se retrouve pas figée dans l'APK. Le fournisseur reste **à trancher avec l'utilisateur avant d'implémenter `core-sync`** (Phase 4 de `IMPLEMENTATION_PLAN.md`), conformément à `CLAUDE.md` §"Quand demander plutôt que supposer".
 
 ---
 

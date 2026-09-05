@@ -13,6 +13,16 @@
             android:name="com.google.android.wearable"
             android:required="false" />
 
+        <!--
+            L'app montre n'est pas autonome : la source de vérité est la base Room du téléphone,
+            et tous les appels sortants (Gemini, Calendar, Alexa) partent de `app`. La montre
+            saisit et affiche, puis synchronise via la Data Layer (DEPLOYMENT.md §12).
+            Déclarer `false` est aussi ce qui fait installer la montre depuis le téléphone.
+        -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="false" />
+
     </application>
 
 </manifest>

@@ -1,3 +1,4 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -9,10 +10,10 @@ plugins {
 
 /** Même mécanisme que dans `core-ai` — voir le commentaire là-bas et DEPLOYMENT.md §4. */
 fun secretOrEmpty(key: String): String {
-    val properties = java.util.Properties()
+    val properties = Properties()
     val file = rootProject.file("local.properties")
     if (file.exists()) {
-        file.inputStream().use(properties::load)
+        file.inputStream().use { stream -> properties.load(stream) }
     }
     return properties.getProperty(key) ?: System.getenv(key) ?: ""
 }

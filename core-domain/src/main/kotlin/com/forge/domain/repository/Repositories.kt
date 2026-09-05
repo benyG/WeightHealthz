@@ -4,6 +4,8 @@ import com.forge.domain.model.AdherenceState
 import com.forge.domain.model.MealCheck
 import com.forge.domain.model.MealSlot
 import com.forge.domain.model.PlanTarget
+import com.forge.domain.model.PlannedMeal
+import com.forge.domain.model.PlannedWorkoutDay
 import com.forge.domain.model.WeeklyAnalysis
 import com.forge.domain.model.WeightEntry
 import com.forge.domain.model.WorkoutSession
@@ -68,4 +70,10 @@ interface PlanRepository {
      * plan n'est importé — l'analyse hebdomadaire n'a alors rien à analyser.
      */
     suspend fun programStartDate(): LocalDate?
+
+    /** Journées types du programme, dans l'ordre du plan. */
+    suspend fun workoutDays(): List<PlannedWorkoutDay>
+
+    /** Prises quotidiennes du programme, dans l'ordre chronologique indicatif. */
+    suspend fun meals(): List<PlannedMeal>
 }

@@ -17,6 +17,8 @@ import com.forge.domain.model.AdherenceState
 import com.forge.domain.model.MealCheck
 import com.forge.domain.model.MealSlot
 import com.forge.domain.model.PlanTarget
+import com.forge.domain.model.PlannedMeal
+import com.forge.domain.model.PlannedWorkoutDay
 import com.forge.domain.model.WeeklyAnalysis
 import com.forge.domain.model.WeightEntry
 import com.forge.domain.model.WorkoutSession
@@ -144,4 +146,8 @@ class RoomPlanRepository @Inject constructor(
 
     override suspend fun programStartDate(): LocalDate? =
         dao.metadata(PlanMetadataEntity.SINGLETON_ID)?.let { LocalDate.ofEpochDay(it.programStartEpochDay) }
+
+    override suspend fun workoutDays(): List<PlannedWorkoutDay> = dao.workoutDays().map { it.toDomain() }
+
+    override suspend fun meals(): List<PlannedMeal> = dao.meals().map { it.toDomain() }
 }

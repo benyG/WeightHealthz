@@ -37,6 +37,10 @@ internal data class WorkoutDayJson(
     val id: String,
     val label: String,
     val exercises: List<PlannedExerciseJson> = emptyList(),
+    /** Jours ISO ("MONDAY"). Absent, aucun événement d'agenda n'est créé pour cette journée. */
+    val daysOfWeek: List<String> = emptyList(),
+    /** Heure locale "HH:mm". Absente, aucun événement d'agenda n'est créé. */
+    val timeOfDay: String? = null,
 )
 
 @Serializable
@@ -53,4 +57,6 @@ internal data class MealJson(
     val slot: String,
     val label: String,
     val description: String = "",
+    /** Heure locale "HH:mm". Absente, aucun événement d'agenda n'est créé pour ce repas. */
+    val timeOfDay: String? = null,
 )

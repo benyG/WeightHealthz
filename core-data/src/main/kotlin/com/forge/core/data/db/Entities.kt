@@ -116,6 +116,10 @@ data class PlannedWorkoutDayEntity(
     @PrimaryKey val id: String,
     val label: String,
     val position: Int,
+    /** Jours de la semaine au format ISO ("MONDAY,THURSDAY"), vide si le plan ne les fixe pas. */
+    val daysOfWeek: String,
+    /** Heure locale "HH:mm", nulle si le plan ne fixe pas de créneau. */
+    val timeOfDay: String?,
 )
 
 @Entity(
@@ -146,6 +150,8 @@ data class PlannedMealEntity(
     val label: String,
     val description: String,
     val position: Int,
+    /** Heure locale "HH:mm", nulle si le plan ne fixe pas d'horaire indicatif. */
+    val timeOfDay: String?,
 )
 
 /**

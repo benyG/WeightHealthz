@@ -17,6 +17,8 @@
     {
       "id": "haut-du-corps",
       "label": "Haut du corps",
+      "daysOfWeek": ["MONDAY", "THURSDAY"],
+      "timeOfDay": "18:30",
       "exercises": [
         { "name": "Développé couché haltères", "prescribedSets": 4, "repMin": 8, "repMax": 10 },
         { "name": "Rowing haltère", "prescribedSets": 4, "repMin": 8, "repMax": 10 },
@@ -27,6 +29,8 @@
     {
       "id": "bas-du-corps",
       "label": "Bas du corps",
+      "daysOfWeek": ["TUESDAY", "SATURDAY"],
+      "timeOfDay": "18:30",
       "exercises": [
         { "name": "Squat gobelet", "prescribedSets": 4, "repMin": 8, "repMax": 12 },
         { "name": "Fente avant", "prescribedSets": 3, "repMin": 10, "repMax": 12 },
@@ -36,11 +40,11 @@
     }
   ],
   "meals": [
-    { "slot": "PETIT_DEJEUNER", "label": "Petit-déjeuner", "description": "À renseigner depuis le plan réel." },
-    { "slot": "COLLATION_1", "label": "Collation 1", "description": "À renseigner depuis le plan réel." },
-    { "slot": "DEJEUNER", "label": "Déjeuner", "description": "À renseigner depuis le plan réel." },
-    { "slot": "COLLATION_2", "label": "Collation 2", "description": "À renseigner depuis le plan réel." },
-    { "slot": "DINER", "label": "Dîner", "description": "À renseigner depuis le plan réel." },
-    { "slot": "COLLATION_3", "label": "Collation 3", "description": "À renseigner depuis le plan réel." }
+    { "slot": "PETIT_DEJEUNER", "timeOfDay": "07:00", "label": "Petit-déjeuner", "description": "À renseigner depuis le plan réel." },
+    { "slot": "COLLATION_1", "timeOfDay": "10:00", "label": "Collation 1", "description": "À renseigner depuis le plan réel." },
+    { "slot": "DEJEUNER", "timeOfDay": "12:30", "label": "Déjeuner", "description": "À renseigner depuis le plan réel." },
+    { "slot": "COLLATION_2", "timeOfDay": "16:00", "label": "Collation 2", "description": "À renseigner depuis le plan réel." },
+    { "slot": "DINER", "timeOfDay": "19:30", "label": "Dîner", "description": "À renseigner depuis le plan réel." },
+    { "slot": "COLLATION_3", "timeOfDay": "21:30", "label": "Collation 3", "description": "À renseigner depuis le plan réel." }
   ]
 }

@@ -9,7 +9,9 @@ import com.forge.core.data.db.PlannedMealEntity
 import com.forge.core.data.db.PlannedWorkoutDayEntity
 import com.forge.domain.model.MealSlot
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
@@ -108,10 +110,29 @@ class PlanImporter @Inject constructor(
             }
         }
 
+        val knownDays = DayOfWeek.entries.map { it.name }.toSet()
+        plan.workoutDays.forEach { day ->
+            val unknownDays = day.daysOfWeek.filterNot { it in knownDays }
+            require(unknownDays.isEmpty()) {
+                "$assetName : ${day.id} référence un jour inconnu ${unknownDays.joinToString()}"
+            }
+            day.timeOfDay?.let { requireParsableTime(it, "$assetName : ${day.id}") }
+        }
+        plan.meals.forEach { meal ->
+            meal.timeOfDay?.let { requireParsableTime(it, "$assetName : ${meal.slot}") }
+        }
+
         plan.weeklyTargets.forEach { target ->
             require(target.targetDeltaKgMin <= target.targetDeltaKgMax) {
                 "$assetName : semaine ${target.weekIndex} a une fourchette de poids inversée"
             }
+        }
+    }
+
+    /** Une heure mal écrite doit échouer à l'import, pas produire un agenda silencieusement vide. */
+    private fun requireParsableTime(raw: String, context: String) {
+        require(runCatching { LocalTime.parse(raw) }.isSuccess) {
+            "$context : heure illisible \"$raw\", format attendu HH:mm"
         }
     }
 
@@ -132,7 +153,13 @@ class PlanImporter @Inject constructor(
                 )
             },
             days = plan.workoutDays.mapIndexed { index, day ->
-                PlannedWorkoutDayEntity(id = day.id, label = day.label, position = index)
+                PlannedWorkoutDayEntity(
+                    id = day.id,
+                    label = day.label,
+                    position = index,
+                    daysOfWeek = day.daysOfWeek.joinToString(","),
+                    timeOfDay = day.timeOfDay,
+                )
             },
             exercises = plan.workoutDays.flatMap { day ->
                 day.exercises.mapIndexed { index, exercise ->
@@ -152,6 +179,7 @@ class PlanImporter @Inject constructor(
                     label = meal.label,
                     description = meal.description,
                     position = index,
+                    timeOfDay = meal.timeOfDay,
                 )
             },
         )

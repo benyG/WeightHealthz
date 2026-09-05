@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // plutôt qu'une convention à faire respecter en relecture.
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    `java-library`
 }
 
 java {
@@ -19,7 +20,9 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
+    // `api` et non `implementation` : les ports de `repository` exposent des Flow dans leur
+    // signature, donc `core-data` et les ViewModels doivent voir ce type de façon transitive.
+    api(libs.kotlinx.coroutines.core)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.junit.jupiter)

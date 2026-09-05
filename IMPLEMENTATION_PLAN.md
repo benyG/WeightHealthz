@@ -34,14 +34,14 @@ Ce document découpe le MVP décrit dans `SPEC.md` §9 en séquence de construct
 
 **Objectif** : un projet Gradle multi-module qui compile, avec la structure de `SPEC.md` §3, avant d'écrire la moindre règle métier.
 
-- [ ] Projet Gradle Kotlin DSL (`settings.gradle.kts` déclare `app`, `wear`, `core-domain`, `core-data`, `core-ai`, `core-sync`).
-- [ ] Version catalog (`gradle/libs.versions.toml`) : Kotlin, Compose, Compose for Wear OS, Hilt, Room, WorkManager, Coroutines, Retrofit/Ktor.
-- [ ] `core-domain` configuré comme module **Kotlin JVM pur** (pas de plugin Android) — ça rend la règle de `CLAUDE.md` ("aucun import `android.*`") impossible à violer par accident plutôt que de compter sur la discipline seule.
-- [ ] `.gitignore` incluant `local.properties`, `*.keystore`, `/build`, `/.gradle`, `local.properties.enc` le cas échéant.
+- [x] Projet Gradle Kotlin DSL (`settings.gradle.kts` déclare `app`, `wear`, `core-domain`, `core-data`, `core-ai`, `core-sync`).
+- [x] Version catalog (`gradle/libs.versions.toml`) : Kotlin, Compose, Compose for Wear OS, Hilt, Room, WorkManager, Coroutines, Retrofit/Ktor.
+- [x] `core-domain` configuré comme module **Kotlin JVM pur** (pas de plugin Android) — ça rend la règle de `CLAUDE.md` ("aucun import `android.*`") impossible à violer par accident plutôt que de compter sur la discipline seule.
+- [x] `.gitignore` incluant `local.properties`, `*.keystore`, `/build`, `/.gradle`, `local.properties.enc` le cas échéant.
 
-  **Point d'attention** : `SPEC.md` §8 et `CLAUDE.md` affirment que `local.properties` est "déjà dans le `.gitignore`" — **aucun `.gitignore` n'existe encore dans le repo à ce stade**. C'est la première chose à créer en Phase 0, avant qu'une clé API ne soit jamais écrite sur disque dans ce repo.
-- [ ] `local.properties.example` (committé, sans valeurs) documentant les clés attendues : `GEMINI_API_KEY`, `DEEPGRAM_API_KEY` (placeholder, non utilisé avant Phase 2 produit), `GOOGLE_CALENDAR_OAUTH_CLIENT_ID`.
-- [ ] CI minimale (voir `DEPLOYMENT.md` §7) : build + tests unitaires `core-domain` sur chaque push.
+  **Corrigé** : `SPEC.md` §8 et `CLAUDE.md` affirmaient que `local.properties` était "déjà dans le `.gitignore`" alors qu'aucun `.gitignore` n'existait. Créé en premier, avant qu'une clé ne puisse être écrite sur disque dans ce repo.
+- [x] `local.properties.example` (committé, sans valeurs) documentant les clés attendues : `GEMINI_API_KEY`, `DEEPGRAM_API_KEY` (placeholder, non utilisé avant Phase 2 produit), `GOOGLE_CALENDAR_OAUTH_CLIENT_ID`.
+- [x] CI minimale (voir `DEPLOYMENT.md` §7) : build + tests unitaires `core-domain` sur chaque push.
 
 **Définition de fini** : `./gradlew build` passe avec les 6 modules vides (juste un `AndroidManifest`/objet marqueur), CI verte.
 
@@ -51,16 +51,16 @@ Ce document découpe le MVP décrit dans `SPEC.md` §9 en séquence de construct
 
 Aucune UI, aucune persistance réelle avant que ces règles existent et soient testées — c'est la fondation dont dépendent `core-data`, `app` et `wear`.
 
-- [ ] Entités de `SPEC.md` §4 (`WeightEntry`, `PlanTarget`, `WorkoutSession`, `ExerciseLog`, `SetLog`, `MealCheck`, `AdherenceState`, `WeeklyAnalysis`, `EscalationLevel`) — types purs, immuables.
-- [ ] Interfaces de repository (ports) définies ici, implémentées en `core-data` (ex. `WeightRepository`, `WorkoutRepository`) — `core-domain` déclare le contrat, ne l'implémente pas.
-- [ ] Moyenne mobile 7 jours sur le poids — fonction pure, testée avec séries lacunaires (jours sans pesée) et bruitées.
-- [ ] Règle d'ajustement calorique : +250 kcal si gain < 0,2 kg/sem. deux semaines de suite, −200 kcal si gain > 0,7 kg/sem. deux semaines de suite, borné à ±300 kcal (`CLAUDE.md` — valeurs non négociables sans demande explicite).
-- [ ] Machine à états d'escalade `À_JOUR → RETARD_1 → RETARD_2 → CRITIQUE`, retour à `À_JOUR` sur toute action valide — testée transition par transition, y compris les cas "action valide pendant `CRITIQUE`" et "deux manquements le même jour ne sautent pas d'état".
-- [ ] Règle de double progression : charge à monter seulement quand **toutes** les séries atteignent le haut de la fourchette de reps avec technique propre.
+- [x] Entités de `SPEC.md` §4 (`WeightEntry`, `PlanTarget`, `WorkoutSession`, `ExerciseLog`, `SetLog`, `MealCheck`, `AdherenceState`, `WeeklyAnalysis`, `EscalationLevel`) — types purs, immuables.
+- [x] Interfaces de repository (ports) définies ici, implémentées en `core-data` (ex. `WeightRepository`, `WorkoutRepository`) — `core-domain` déclare le contrat, ne l'implémente pas.
+- [x] Moyenne mobile 7 jours sur le poids — fonction pure, testée avec séries lacunaires (jours sans pesée) et bruitées.
+- [x] Règle d'ajustement calorique : +250 kcal si gain < 0,2 kg/sem. deux semaines de suite, −200 kcal si gain > 0,7 kg/sem. deux semaines de suite, borné à ±300 kcal (`CLAUDE.md` — valeurs non négociables sans demande explicite).
+- [x] Machine à états d'escalade `À_JOUR → RETARD_1 → RETARD_2 → CRITIQUE`, retour à `À_JOUR` sur toute action valide — testée transition par transition, y compris les cas "action valide pendant `CRITIQUE`" et "deux manquements le même jour ne sautent pas d'état".
+- [x] Règle de double progression : charge à monter seulement quand **toutes** les séries atteignent le haut de la fourchette de reps avec technique propre.
 
-  **Décision à clarifier avant codage** : `SPEC.md` ne précise pas comment "technique propre" est capturé côté saisie (case à cocher manuelle par set ? confirmation implicite si l'utilisateur ne signale rien ?). C'est un choix de wireframe/UX non tranché par `SPEC.md` — à trancher avec l'utilisateur avant d'écrire l'écran de séance (Phase 5/6), pas à combler par une supposition pendant l'implémentation de la règle.
-- [ ] Détection de stagnation (aucune progression sur un exercice depuis 2 semaines).
-- [ ] Chaque règle ci-dessus arrive avec son test JVM pur **avant** d'être branchée à un repository ou une UI (règle de `CLAUDE.md`).
+  **Décision toujours ouverte** : le domaine porte l'information (`SetLog.cleanTechnique`, **sans valeur par défaut** — un défaut à `true` trancherait en douce en faveur de "propre sauf mention contraire"). Reste à décider comment l'écran de séance la capture (case à cocher par série ? confirmation implicite ?) : à trancher avant la phase 5/6, pas pendant.
+- [x] Détection de stagnation (aucune progression sur un exercice depuis 2 semaines).
+- [x] Chaque règle ci-dessus arrive avec son test JVM pur **avant** d'être branchée à un repository ou une UI (règle de `CLAUDE.md`).
 
 **Définition de fini** : 100 % des règles ci-dessus ont un test JVM vert, exécutable sans émulateur ni Robolectric.
 
@@ -149,6 +149,7 @@ Cette phase n'ajoute pas de fonctionnalité — elle vérifie que l'ensemble fon
 ## 11. Décisions à trancher avant/pendant l'implémentation (ne pas combler par défaut)
 
 - Modalité de saisie de la "technique propre" pour la double progression (Phase 1/5/6, §3).
+- **Nombre de prises quotidiennes** : `SPEC.md` §5.3 et `DESIGN.md` §7.1 en comptent six ("Repas restants : 2/6"), mais la checklist dessinée en `DESIGN.md` §7.2 n'en liste que cinq. `MealSlot` suit `SPEC.md` (six prises, la sixième nommée `COLLATION_3` faute de mieux) ; le libellé réel viendra du plan importé en phase 2, mais l'écart entre les deux documents est à trancher.
 - Mécanisme de notification `CRITIQUE` : `fullScreenIntent` vs notification haute priorité classique (Phase 5, §7).
 - Fournisseur du relais webhook Alexa : Notify-My-Alexa vs IFTTT Applet (Phase 4, §6 — détaillé dans `DEPLOYMENT.md` §11).
 

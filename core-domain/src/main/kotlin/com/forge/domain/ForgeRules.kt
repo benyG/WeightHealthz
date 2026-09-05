@@ -43,4 +43,7 @@ object ForgeRules {
     const val ESCALATION_DAYS_LEVEL_1: Int = 1
     const val ESCALATION_DAYS_LEVEL_2: Int = 2
     const val ESCALATION_DAYS_CRITICAL: Int = 3
+
+    /** Semaines sans progression sur un exercice avant de le signaler comme stagnant (SPEC.md §5.4). */
+    const val STAGNATION_WEEKS: Int = 2
 }

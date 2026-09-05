@@ -23,6 +23,7 @@ class ForgeRulesTest {
         assertEquals(250, ForgeRules.KCAL_ADJUSTMENT_UP)
         assertEquals(-200, ForgeRules.KCAL_ADJUSTMENT_DOWN)
         assertEquals(300, ForgeRules.KCAL_ADJUSTMENT_BOUND)
+        assertEquals(2, ForgeRules.STAGNATION_WEEKS)
     }
 
     @Test

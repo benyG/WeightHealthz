@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Déclarées par le module qui en a besoin. Lecture et écriture sont toutes deux requises :
+        écrire les événements du programme, et relire ceux déjà posés pour ne pas les recréer
+        à chaque onboarding.
+    -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
+</manifest>

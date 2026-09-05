@@ -1,6 +1,8 @@
 package com.forge.core.ai.analysis
 
 import com.forge.domain.model.PlanTarget
+import com.forge.domain.model.PlannedMeal
+import com.forge.domain.model.PlannedWorkoutDay
 import com.forge.domain.model.WeeklyAnalysis
 import com.forge.domain.model.WeeklyReport
 import com.forge.domain.model.WeightEntry
@@ -46,6 +48,8 @@ class WeeklyAnalysisServiceTest {
         override suspend fun targetForWeek(weekIndex: Int) = target
         override suspend fun plannedSessionsPerWeek() = sessionsPerWeek
         override suspend fun programStartDate() = start
+        override suspend fun workoutDays(): List<PlannedWorkoutDay> = emptyList()
+        override suspend fun meals(): List<PlannedMeal> = emptyList()
     }
 
     private class RecordingAnalyses : WeeklyAnalysisRepository {

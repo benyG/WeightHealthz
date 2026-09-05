@@ -80,6 +80,8 @@ internal fun WeeklyAnalysis.toEntity(): WeeklyAnalysisEntity =
     WeeklyAnalysisEntity(
         weekIndex = weekIndex,
         summaryText = summaryText,
+        focusExercise = focusExercise,
+        audioScript = audioScript,
         audioUrl = audioUrl,
         recommendedAdjustmentKcal = recommendedAdjustmentKcal,
     )
@@ -88,6 +90,8 @@ internal fun WeeklyAnalysisEntity.toDomain(): WeeklyAnalysis =
     WeeklyAnalysis(
         weekIndex = weekIndex,
         summaryText = summaryText,
+        focusExercise = focusExercise,
+        audioScript = audioScript,
         audioUrl = audioUrl,
         recommendedAdjustmentKcal = recommendedAdjustmentKcal,
     )

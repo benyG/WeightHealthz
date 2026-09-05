@@ -52,6 +52,10 @@ interface WorkoutDao {
     )
     suspend fun sessionsWithExercise(exerciseName: String, sinceEpochDay: Long): List<SessionWithExercises>
 
+    @Transaction
+    @Query("SELECT * FROM workout_session WHERE epochDay BETWEEN :from AND :to ORDER BY epochDay")
+    suspend fun sessionsBetween(from: Long, to: Long): List<SessionWithExercises>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: WorkoutSessionEntity)
 

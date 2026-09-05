@@ -62,14 +62,14 @@ class PlanImporter @Inject constructor(
         val current = planDao.metadata(PlanMetadataEntity.SINGLETON_ID)
         return when {
             current == null -> {
-                write(plan, today)
+                write(plan, today, previous = null)
                 Outcome.Imported(plan.version)
             }
 
             current.version == plan.version -> Outcome.AlreadyImported(plan.version)
 
             else -> {
-                write(plan, today)
+                write(plan, today, previous = current)
                 Outcome.Replaced(from = current.version, to = plan.version)
             }
         }
@@ -115,12 +115,14 @@ class PlanImporter @Inject constructor(
         }
     }
 
-    private suspend fun write(plan: PlanJson, today: LocalDate) {
+    private suspend fun write(plan: PlanJson, today: LocalDate, previous: PlanMetadataEntity?) {
         planDao.replacePlan(
             metadata = PlanMetadataEntity(
                 version = plan.version,
                 importedAtEpochDay = today.toEpochDay(),
+                programStartEpochDay = previous?.programStartEpochDay ?: today.toEpochDay(),
                 availableLoadsKg = plan.availableLoadsKg,
+                sessionsPerWeek = plan.sessionsPerWeek ?: plan.workoutDays.size,
             ),
             targets = plan.weeklyTargets.map {
                 PlanTargetEntity(

@@ -5,6 +5,7 @@ import com.forge.core.data.db.AdherenceStateEntity
 import com.forge.core.data.db.ExerciseLogEntity
 import com.forge.core.data.db.MealDao
 import com.forge.core.data.db.PlanDao
+import com.forge.core.data.db.PlanMetadataEntity
 import com.forge.core.data.db.SetLogEntity
 import com.forge.core.data.db.WeeklyAnalysisDao
 import com.forge.core.data.db.WeightDao
@@ -101,6 +102,9 @@ class RoomWorkoutRepository @Inject constructor(
 
     override suspend fun historyFor(exerciseName: String, since: LocalDate): List<WorkoutSession> =
         dao.sessionsWithExercise(exerciseName, since.toEpochDay()).map { it.toDomain() }
+
+    override suspend fun sessionsBetween(from: LocalDate, to: LocalDate): List<WorkoutSession> =
+        dao.sessionsBetween(from.toEpochDay(), to.toEpochDay()).map { it.toDomain() }
 }
 
 @Singleton
@@ -133,4 +137,11 @@ class RoomPlanRepository @Inject constructor(
 
     override suspend fun targetForWeek(weekIndex: Int): PlanTarget? =
         dao.targetForWeek(weekIndex)?.toDomain()
+
+    /** Zéro tant qu'aucun plan n'est importé : on ne devine pas un programme absent. */
+    override suspend fun plannedSessionsPerWeek(): Int =
+        dao.metadata(PlanMetadataEntity.SINGLETON_ID)?.sessionsPerWeek ?: 0
+
+    override suspend fun programStartDate(): LocalDate? =
+        dao.metadata(PlanMetadataEntity.SINGLETON_ID)?.let { LocalDate.ofEpochDay(it.programStartEpochDay) }
 }

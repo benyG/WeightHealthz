@@ -95,6 +95,9 @@ data class AdherenceStateEntity(
 data class WeeklyAnalysisEntity(
     @PrimaryKey val weekIndex: Int,
     val summaryText: String,
+    val focusExercise: String,
+    /** Texte destiné à l'oral, produit dès le MVP, vocalisé en phase 2 (SPEC.md §6.1). */
+    val audioScript: String,
     val audioUrl: String?,
     val recommendedAdjustmentKcal: Int,
 )
@@ -154,8 +157,16 @@ data class PlanMetadataEntity(
     @PrimaryKey val id: Int = SINGLETON_ID,
     val version: Int,
     val importedAtEpochDay: Long,
+    /**
+     * Début du programme : posé au tout premier import et conservé ensuite, y compris quand une
+     * nouvelle version du plan remplace le contenu — changer de programme ne remet pas la
+     * semaine 4 à la semaine 1.
+     */
+    val programStartEpochDay: Long,
     /** Charges réellement disponibles, pour la suggestion de palier (SPEC.md §5.4). */
     val availableLoadsKg: List<Float>,
+    /** Dénominateur du "séances complétées / planifiées" (SPEC.md §2). */
+    val sessionsPerWeek: Int,
 ) {
     companion object {
         const val SINGLETON_ID: Int = 0

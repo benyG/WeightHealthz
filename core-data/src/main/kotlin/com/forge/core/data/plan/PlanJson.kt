@@ -13,6 +13,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class PlanJson(
     val version: Int,
+    /**
+     * Séances prévues par semaine. Absent, on retombe sur le nombre de journées types du plan —
+     * l'hypothèse "chaque journée est faite une fois par semaine" est explicite ici plutôt que
+     * cachée dans le code appelant, et un vrai programme peut la contredire en le renseignant.
+     */
+    val sessionsPerWeek: Int? = null,
     val availableLoadsKg: List<Float> = emptyList(),
     val weeklyTargets: List<WeeklyTargetJson> = emptyList(),
     val workoutDays: List<WorkoutDayJson> = emptyList(),

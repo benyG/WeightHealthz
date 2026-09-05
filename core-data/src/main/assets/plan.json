@@ -1,6 +1,7 @@
 {
   "note": "PLAN D'EXEMPLE — à remplacer par le programme réel. La version 0 signale un contenu de substitution : le vrai plan démarre à la version 1, et l'import le remplacera automatiquement au prochain lancement. Les valeurs ci-dessous reprennent les exemples de DESIGN.md (semaine 4 visant +1,2 à +2,0 kg, développé couché, squat gobelet) pour que les écrans aient de quoi s'afficher, pas pour tenir lieu de programme.",
   "version": 0,
+  "sessionsPerWeek": 4,
   "availableLoadsKg": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24],
   "weeklyTargets": [
     { "weekIndex": 1, "targetDeltaKgMin": 0.3, "targetDeltaKgMax": 0.5 },

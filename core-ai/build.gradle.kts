@@ -43,6 +43,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    testOptions {
+        unitTests {
+            // Les tests sont du Kotlin pur ; seul `android.util.Log` traverse le framework et
+            // doit rendre une valeur par défaut au lieu de lever.
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 kotlin {
@@ -57,10 +65,15 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization.converter)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
     testImplementation(libs.junit4)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

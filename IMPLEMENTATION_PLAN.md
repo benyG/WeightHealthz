@@ -68,13 +68,15 @@ Aucune UI, aucune persistance réelle avant que ces règles existent et soient t
 
 ## 4. Phase 2 — `core-data` : persistance + Health Connect
 
-- [ ] Schéma Room miroir des entités `core-domain`, avec mappers explicites (entité Room ≠ modèle domaine, pour ne pas faire fuiter Room dans `core-domain`).
-- [ ] Implémentation des repositories définis en Phase 1.
-- [ ] Import du plan structuré au premier lancement (`SPEC.md` §5.1) : asset JSON bundlé (nutrition + musculation), parsé et inséré en Room au premier run — pas de saisie manuelle du plan par l'utilisateur.
-- [ ] Intégration Health Connect en **lecture seule** pour le poids : lecture déclenchée par le rappel programmé (WorkManager), jamais de polling continu (`SPEC.md` §8 — contrainte batterie).
-- [ ] Tests DAO Room (base en mémoire) + test de la logique d'import du plan (idempotence : ne pas dupliquer si l'app est relancée).
+- [x] Schéma Room miroir des entités `core-domain`, avec mappers explicites (entité Room ≠ modèle domaine, pour ne pas faire fuiter Room dans `core-domain`).
+- [x] Implémentation des repositories définis en Phase 1.
+- [x] Import du plan structuré au premier lancement (`SPEC.md` §5.1) : asset JSON bundlé (nutrition + musculation), parsé et inséré en Room au premier run — pas de saisie manuelle du plan par l'utilisateur.
+- [x] Intégration Health Connect en **lecture seule** pour le poids : lecture déclenchée par le rappel programmé (WorkManager), jamais de polling continu (`SPEC.md` §8 — contrainte batterie).
+- [x] Tests DAO Room (base en mémoire) + test de la logique d'import du plan (idempotence : ne pas dupliquer si l'app est relancée).
 
 **Définition de fini** : un poids lu depuis Health Connect (ou saisi manuellement) traverse repository → Room → relecture, et le plan pré-chargé est visible en base après premier lancement, sans doublon sur relance.
+
+**Réserve** : le `plan.json` livré est un **contenu d'exemple en version 0**, le programme réel n'ayant pas encore été fourni. Le mécanisme est complet et testé ; le remplacer par le vrai programme sera une modification de données (version 1 du fichier), pas de code. Voir §11.
 
 ---
 
@@ -148,6 +150,7 @@ Cette phase n'ajoute pas de fonctionnalité — elle vérifie que l'ensemble fon
 
 ## 11. Décisions à trancher avant/pendant l'implémentation (ne pas combler par défaut)
 
+- **Contenu réel du programme** (Phase 2, §4) : `SPEC.md` §5.1 suppose le plan nutrition/musculation pré-chargé, mais il n'est nulle part dans le repo. `core-data/src/main/assets/plan.json` porte un contenu d'exemple en version 0 pour que les écrans aient de quoi s'afficher. Fournir le vrai programme (en version 1) est la seule chose qui manque pour que la phase 2 soit réellement utile.
 - Modalité de saisie de la "technique propre" pour la double progression (Phase 1/5/6, §3).
 - **Nombre de prises quotidiennes** : `SPEC.md` §5.3 et `DESIGN.md` §7.1 en comptent six ("Repas restants : 2/6"), mais la checklist dessinée en `DESIGN.md` §7.2 n'en liste que cinq. `MealSlot` suit `SPEC.md` (six prises, la sixième nommée `COLLATION_3` faute de mieux) ; le libellé réel viendra du plan importé en phase 2, mais l'écart entre les deux documents est à trancher.
 - Mécanisme de notification `CRITIQUE` : `fullScreenIntent` vs notification haute priorité classique (Phase 5, §7).

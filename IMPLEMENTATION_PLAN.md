@@ -159,6 +159,8 @@ Cette phase n'ajoute pas de fonctionnalité — elle vérifie que l'ensemble fon
 - *Contradiction interne à `DESIGN.md`* : les wireframes §7 emploient le point médian comme séparateur (« Forge · Semaine 4/8 ») et la flèche en fin de libellé (« Séance : Haut du corps → »), que la checklist §11 interdit explicitement. La checklist a été suivie, étant présentée comme la porte de sortie avant livraison d'un écran. **À trancher.**
 - *Mouvement* : §6 autorise une animation confirmant une action (coche d'un repas). Elle n'a pas été ajoutée — non par oubli, mais parce qu'une animation invérifiable ici vaut moins qu'une absence assumée.
 
+**Dette d'outillage constatée en CI** : lint plante en analysant les sources de test de `app` — « Unexpected failure during lint analysis of `EscalationConvergenceTest.kt` (this is a bug in lint or one of the libraries it depends on) », résolution `RAW_FIR → SUPER_TYPES`. Le code compile et les tests passent ; c'est l'outil qui tombe. `app` pose donc `lint { ignoreTestSources = true }`, ce qui sort les sources de test du périmètre de lint **et rien d'autre** : lint garde toute sa sévérité sur ce qui est livré. À rouvrir à la prochaine montée d'AGP.
+
 **Définition de fini du MVP** : le test de convergence passe. Restent **hors du test** deux éléments qui ne dépendent pas du code livré : le client webhook du relais vocal (fournisseur à choisir, §11) et l'écran de séance active (saisie de série, §11). Le MVP n'est donc pas complet au sens de `SPEC.md` §9 tant que ces deux points ne sont pas tranchés.
 
 ---

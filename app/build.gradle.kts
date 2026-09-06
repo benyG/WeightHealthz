@@ -41,6 +41,18 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    lint {
+        // Lint plante en analysant les sources de test — pas sur une règle, sur sa propre
+        // résolution de types : « Unexpected failure during lint analysis of
+        // EscalationConvergenceTest.kt (this is a bug in lint or one of the libraries it depends
+        // on) », RAW_FIR → SUPER_TYPES. Le code de test compile et les tests passent ; c'est
+        // l'outil qui tombe, pas le projet.
+        //
+        // On retire donc les sources de test du périmètre de lint, et d'elles seules : lint garde
+        // toute sa sévérité sur ce qui est livré. À rouvrir à la prochaine montée d'AGP.
+        ignoreTestSources = true
+    }
 }
 
 kotlin {

@@ -2,6 +2,7 @@ package com.forge.notification
 
 import android.Manifest
 import android.app.NotificationChannel
+import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
@@ -69,7 +70,6 @@ class ForgeNotifications @Inject constructor(
     /** Ne poste rien si la permission n'est pas accordée — sans lever : ce n'est pas une panne. */
     override fun notifyEscalation(level: EscalationLevel, message: String) {
         if (level == EscalationLevel.A_JOUR) return
-        if (!canPost()) return
 
         val notification = NotificationCompat.Builder(context, channelFor(level))
             .setSmallIcon(android.R.drawable.stat_notify_sync)
@@ -81,12 +81,10 @@ class ForgeNotifications @Inject constructor(
             .setAutoCancel(level != EscalationLevel.CRITIQUE)
             .build()
 
-        NotificationManagerCompat.from(context).notify(notificationIdFor(level), notification)
+        post(ID_ESCALATION, notification)
     }
 
     fun notifyReminder(title: String, message: String) {
-        if (!canPost()) return
-
         val notification = NotificationCompat.Builder(context, CHANNEL_REMINDER)
             .setSmallIcon(android.R.drawable.stat_notify_sync)
             .setContentTitle(title)
@@ -95,12 +93,21 @@ class ForgeNotifications @Inject constructor(
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(ID_REMINDER, notification)
+        post(ID_REMINDER, notification)
     }
 
-    private fun canPost(): Boolean =
-        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+    /**
+     * La vérification de permission et l'envoi vivent dans la même méthode : lint ne suit pas un
+     * garde placé dans une fonction auxiliaire, et un `@SuppressLint` aurait masqué la question
+     * au lieu d'y répondre.
+     */
+    private fun post(id: Int, notification: Notification) {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
+        if (!granted) return
+
+        NotificationManagerCompat.from(context).notify(id, notification)
+    }
 
     private fun channelFor(level: EscalationLevel) = when (level) {
         EscalationLevel.CRITIQUE -> CHANNEL_CRITICAL
@@ -120,14 +127,12 @@ class ForgeNotifications @Inject constructor(
         EscalationLevel.A_JOUR -> ""
     }
 
-    /** Un identifiant par niveau : un `CRITIQUE` remplace le `RETARD_2` au lieu de s'empiler. */
-    private fun notificationIdFor(level: EscalationLevel) = ID_ESCALATION
-
     companion object {
         const val CHANNEL_REMINDER = "forge-rappels"
         const val CHANNEL_LATE = "forge-retard"
         const val CHANNEL_CRITICAL = "forge-critique"
 
+        /** Un seul identifiant : un `CRITIQUE` remplace le `RETARD_2` au lieu de s'empiler. */
         private const val ID_ESCALATION = 1001
         private const val ID_REMINDER = 1002
     }

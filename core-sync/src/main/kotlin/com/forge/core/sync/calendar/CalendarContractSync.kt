@@ -1,6 +1,7 @@
 package com.forge.core.sync.calendar
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
@@ -55,6 +56,7 @@ class CalendarContractSync @Inject constructor(
      * Premier calendrier où l'on peut écrire, en préférant un compte Google : c'est celui qui
      * remonte dans Google Calendar, ce que demande SPEC.md §5.8.
      */
+    @SuppressLint("MissingPermission") // Garde vérifié dans `sync`, que lint ne suit pas jusqu'ici.
     private fun writableCalendarId(): Long? {
         val projection = arrayOf(
             CalendarContract.Calendars._ID,
@@ -84,6 +86,7 @@ class CalendarContractSync @Inject constructor(
         return null
     }
 
+    @SuppressLint("MissingPermission") // Garde vérifié dans `sync`, que lint ne suit pas jusqu'ici.
     private fun existingKeys(): Set<String> {
         val projection = arrayOf(CalendarContract.Events.CUSTOM_APP_URI)
         val selection = "${CalendarContract.Events.CUSTOM_APP_PACKAGE} = ?"
@@ -104,6 +107,7 @@ class CalendarContractSync @Inject constructor(
         } ?: emptySet()
     }
 
+    @SuppressLint("MissingPermission") // Garde vérifié dans `sync`, que lint ne suit pas jusqu'ici.
     private fun insert(spec: CalendarEventSpec, calendarId: Long, zone: ZoneId): Boolean {
         val start = spec.firstDate.atTime(spec.startTime).atZone(zone).toInstant().toEpochMilli()
 
@@ -133,6 +137,7 @@ class CalendarContractSync @Inject constructor(
     }
 
     /** Le rappel natif de l'agenda vient en plus des notifications Forge (SPEC.md §5.8). */
+    @SuppressLint("MissingPermission") // Garde vérifié dans `sync`, que lint ne suit pas jusqu'ici.
     private fun addReminder(eventId: Long, minutesBefore: Int) {
         val values = ContentValues().apply {
             put(CalendarContract.Reminders.EVENT_ID, eventId)

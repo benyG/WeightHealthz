@@ -75,6 +75,9 @@ dependencies {
     // L'écran d'onboarding demande les permissions Health Connect, dont le contrat vit ici.
     implementation(libs.androidx.health.connect.client)
 
+    implementation(libs.play.services.wearable)
+    implementation(libs.kotlinx.coroutines.play.services)
+
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)

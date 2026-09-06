@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.forge.domain.model.WeightEntry
 import com.forge.domain.model.WeightSource
 import com.forge.domain.repository.WeightRepository
+import com.forge.wearlink.WeightGapPublisher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
@@ -22,6 +23,7 @@ data class WeightEntryUiState(
 @HiltViewModel
 class WeightEntryViewModel @Inject constructor(
     private val weights: WeightRepository,
+    private val gapPublisher: WeightGapPublisher,
 ) : ViewModel() {
 
     val state: StateFlow<WeightEntryUiState> = weights.observeAll()
@@ -45,6 +47,9 @@ class WeightEntryViewModel @Inject constructor(
     fun save(kg: Float) {
         viewModelScope.launch {
             weights.record(WeightEntry(LocalDate.now(), kg, WeightSource.MANUAL))
+            // La Tile et la complication montrent l'écart : sans cette publication, elles
+            // resteraient sur la valeur d'avant la pesée.
+            gapPublisher.publish()
         }
     }
 }

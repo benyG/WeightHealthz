@@ -10,6 +10,7 @@ import com.forge.domain.model.WorkoutSession
 import com.forge.domain.repository.PlanRepository
 import com.forge.domain.repository.WorkoutRepository
 import com.forge.domain.rule.DoubleProgression
+import com.forge.domain.rule.SessionLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
@@ -185,13 +186,11 @@ class SessionViewModel @Inject constructor(
 
     /** Séries de la dernière séance où cet exercice a été travaillé, hors séance du jour. */
     private suspend fun previousSets(exerciseName: String): List<SetLog> =
-        workouts.historyFor(exerciseName, today.minusDays(LOOKBACK_DAYS))
-            .filter { it.date < today }
-            .maxByOrNull { it.date }
-            ?.exercises
-            ?.firstOrNull { it.name == exerciseName }
-            ?.sets
-            .orEmpty()
+        SessionLog.lastSetsBefore(
+            sessions = workouts.historyFor(exerciseName, today.minusDays(LOOKBACK_DAYS)),
+            exerciseName = exerciseName,
+            date = today,
+        )
 
     private fun earnedNextLoad(
         sets: List<SetLog>,

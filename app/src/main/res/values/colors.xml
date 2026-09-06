@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Graphite chaud de DESIGN.md §2, dupliqué ici parce que le thème système le réclame
+         avant que Compose ne s'exécute. Toute modification doit suivre ForgeColors.Graphite. -->
+    <color name="graphite">#1E1B17</color>
+</resources>

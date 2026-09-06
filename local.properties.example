@@ -1,0 +1,17 @@
+# Copier ce fichier en `local.properties` (jamais commit — voir .gitignore) et renseigner les
+# valeurs. En CI, les mêmes clés sont lues depuis les variables d'environnement (secrets GitHub
+# Actions) : une clé absente produit une chaîne vide dans BuildConfig, le build reste vert.
+#
+# Voir DEPLOYMENT.md §4 pour la gestion des secrets, §9 et §10 pour l'obtention des clés.
+
+# Chemin du SDK Android (renseigné automatiquement par Android Studio)
+sdk.dir=/chemin/vers/Android/Sdk
+
+# Analyse hebdomadaire (SPEC.md §6) — consommée par core-ai
+GEMINI_API_KEY=
+
+# Voix Aura/Nova (SPEC.md §9, phase 2) — déclarée maintenant, non consommée avant la phase vocale
+DEEPGRAM_API_KEY=
+
+# Aucune clé pour l'agenda : core-sync écrit via le fournisseur CalendarContract du système,
+# sans OAuth ni projet Google Cloud (DEPLOYMENT.md §9).

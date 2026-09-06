@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Déclaré par le module qui en a besoin plutôt que dans `app` : c'est core-data qui lit
+        Health Connect, la fusion de manifeste fait remonter le tout dans l'app.
+        Lecture seule du poids — Forge n'écrit jamais dans Health Connect (SPEC.md §5.2).
+    -->
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+
+    <!-- Sans cette déclaration, l'app ne voit pas le paquet Health Connect et le croit absent. -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
+
+</manifest>

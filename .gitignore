@@ -1,0 +1,27 @@
+# Secrets — jamais commit (SPEC.md §8, CLAUDE.md §"Secrets et confidentialité")
+local.properties
+*.keystore
+*.jks
+keystore.properties
+.env
+
+# Gradle / build
+.gradle/
+build/
+.kotlin/
+
+# Android
+*.apk
+*.aab
+captures/
+.cxx/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db

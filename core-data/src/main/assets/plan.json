@@ -1,0 +1,50 @@
+{
+  "note": "PLAN D'EXEMPLE — à remplacer par le programme réel. La version 0 signale un contenu de substitution : le vrai plan démarre à la version 1, et l'import le remplacera automatiquement au prochain lancement. Les valeurs ci-dessous reprennent les exemples de DESIGN.md (semaine 4 visant +1,2 à +2,0 kg, développé couché, squat gobelet) pour que les écrans aient de quoi s'afficher, pas pour tenir lieu de programme.",
+  "version": 0,
+  "sessionsPerWeek": 4,
+  "availableLoadsKg": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24],
+  "weeklyTargets": [
+    { "weekIndex": 1, "targetDeltaKgMin": 0.3, "targetDeltaKgMax": 0.5 },
+    { "weekIndex": 2, "targetDeltaKgMin": 0.6, "targetDeltaKgMax": 1.0 },
+    { "weekIndex": 3, "targetDeltaKgMin": 0.9, "targetDeltaKgMax": 1.5 },
+    { "weekIndex": 4, "targetDeltaKgMin": 1.2, "targetDeltaKgMax": 2.0 },
+    { "weekIndex": 5, "targetDeltaKgMin": 1.5, "targetDeltaKgMax": 2.5 },
+    { "weekIndex": 6, "targetDeltaKgMin": 1.8, "targetDeltaKgMax": 3.0 },
+    { "weekIndex": 7, "targetDeltaKgMin": 2.1, "targetDeltaKgMax": 3.5 },
+    { "weekIndex": 8, "targetDeltaKgMin": 2.4, "targetDeltaKgMax": 4.0 }
+  ],
+  "workoutDays": [
+    {
+      "id": "haut-du-corps",
+      "label": "Haut du corps",
+      "daysOfWeek": ["MONDAY", "THURSDAY"],
+      "timeOfDay": "18:30",
+      "exercises": [
+        { "name": "Développé couché haltères", "prescribedSets": 4, "repMin": 8, "repMax": 10 },
+        { "name": "Rowing haltère", "prescribedSets": 4, "repMin": 8, "repMax": 10 },
+        { "name": "Développé militaire", "prescribedSets": 3, "repMin": 8, "repMax": 12 },
+        { "name": "Curl biceps", "prescribedSets": 3, "repMin": 10, "repMax": 12 }
+      ]
+    },
+    {
+      "id": "bas-du-corps",
+      "label": "Bas du corps",
+      "daysOfWeek": ["TUESDAY", "SATURDAY"],
+      "timeOfDay": "18:30",
+      "exercises": [
+        { "name": "Squat gobelet", "prescribedSets": 4, "repMin": 8, "repMax": 12 },
+        { "name": "Fente avant", "prescribedSets": 3, "repMin": 10, "repMax": 12 },
+        { "name": "Soulevé de terre roumain", "prescribedSets": 4, "repMin": 8, "repMax": 10 },
+        { "name": "Mollets debout", "prescribedSets": 3, "repMin": 12, "repMax": 15 }
+      ]
+    }
+  ],
+  "meals": [
+    { "slot": "PETIT_DEJEUNER", "timeOfDay": "07:00", "label": "Petit-déjeuner", "description": "À renseigner depuis le plan réel." },
+    { "slot": "COLLATION_1", "timeOfDay": "10:00", "label": "Collation 1", "description": "À renseigner depuis le plan réel." },
+    { "slot": "DEJEUNER", "timeOfDay": "12:30", "label": "Déjeuner", "description": "À renseigner depuis le plan réel." },
+    { "slot": "COLLATION_2", "timeOfDay": "16:00", "label": "Collation 2", "description": "À renseigner depuis le plan réel." },
+    { "slot": "DINER", "timeOfDay": "19:30", "label": "Dîner", "description": "À renseigner depuis le plan réel." },
+    { "slot": "COLLATION_3", "timeOfDay": "21:30", "label": "Collation 3", "description": "À renseigner depuis le plan réel." }
+  ]
+}

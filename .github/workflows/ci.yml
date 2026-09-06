@@ -1,0 +1,49 @@
+name: CI
+
+# Chaque push, sur toute branche. Les checks se rattachent au commit, donc une PR affiche
+# le résultat du run de son head sans qu'un déclencheur `pull_request` ne double les exécutions.
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurer le JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurer Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # Barrière rapide et sans émulateur : les règles métier de core-domain (CLAUDE.md).
+      - name: Tests unitaires core-domain (JVM pur)
+        run: ./gradlew :core-domain:test
+
+      # Aucun secret n'est injecté ici : les clés absentes produisent des BuildConfig vides
+      # (DEPLOYMENT.md §4), ce qui doit suffire à compiler les six modules.
+      - name: Build complet des six modules
+        run: ./gradlew build
+
+      - name: Publier les rapports de test en cas d'échec
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapports-tests
+          path: |
+            **/build/reports/tests/
+            **/build/reports/lint-results-*.html
+          retention-days: 7

@@ -59,6 +59,7 @@ class EscalationConvergenceTest {
     private class FakeWorkouts(var session: WorkoutSession? = null) : WorkoutRepository {
         override fun observeSession(date: LocalDate): Flow<WorkoutSession?> = flowOf(session)
         override suspend fun save(session: WorkoutSession) { this.session = session }
+        override suspend fun delete(date: LocalDate) { this.session = null }
         override suspend fun historyFor(exerciseName: String, since: LocalDate) = emptyList<WorkoutSession>()
         override suspend fun sessionsBetween(from: LocalDate, to: LocalDate) = emptyList<WorkoutSession>()
     }

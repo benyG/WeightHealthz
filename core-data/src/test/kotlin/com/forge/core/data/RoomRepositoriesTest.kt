@@ -23,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -151,6 +152,24 @@ class RoomRepositoriesTest {
         assertNotNull(stored)
         assertEquals(1, stored!!.exercises.single().sets.size)
         assertEquals(12, stored.exercises.single().sets.single().reps)
+    }
+
+    @Test
+    fun `effacer la seance ne laisse ni exercice ni serie derriere elle`() = runTest {
+        val repository = RoomWorkoutRepository(database.workoutDao())
+        repository.save(
+            WorkoutSession(
+                today,
+                DayTemplate("Bas du corps"),
+                listOf(ExerciseLog("Squat gobelet", listOf(SetLog(12, 16f, true)))),
+            ),
+        )
+
+        repository.delete(today)
+
+        // Nul, et pas une séance vide : une séance vide ferait compter la journée comme tenue.
+        assertNull(repository.observeSession(today).first())
+        assertEquals(emptyList<WorkoutSession>(), repository.historyFor("Squat gobelet", today.minusDays(7)))
     }
 
     @Test

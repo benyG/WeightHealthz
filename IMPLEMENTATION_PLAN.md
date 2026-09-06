@@ -123,12 +123,12 @@ Livrée en deux temps, le fournisseur du relais vocal n'étant pas tranché.
 
 - [x] ViewModels par écran, qui exposent des `State`/`Flow` — aucune règle métier dans les composables (`CLAUDE.md`).
 - [x] Écrans conformes aux wireframes `DESIGN.md` §7 : Accueil, Pesée, Checklist repas, Analyse hebdo, Onboarding écosystème.
-- [ ] Écran de séance active (`DESIGN.md` §7.4) — **volontairement non livré** : la double progression exige de savoir si une série a été faite avec une technique propre, et `SetLog.cleanTechnique` n'a délibérément pas de valeur par défaut. Comment on capture ce jugement (case à cocher par série, par exercice, question de fin de séance) décide de la forme de l'écran ; le supposer reviendrait à choisir à la place de l'utilisateur (§11).
+- [x] Écran de séance active : exercices du jour, saisie charge × reps série par série, case « technique propre » par série, charge proposée par la double progression et palier gagné pour la prochaine séance. `DESIGN.md` ne dessine que la version montre (§7.3) ; l'écran téléphone en reprend la hiérarchie dans la mise en page réglée du reste de l'app.
 - [x] Canaux de notification distincts pour `RETARD_1` (standard), `RETARD_2` (insistante + vibration), `CRITIQUE`. **Écart assumé** : pas de `fullScreenIntent`. Depuis Android 14, `USE_FULL_SCREEN_INTENT` n'est accordée d'office qu'aux apps d'appel et de réveil ; une app de coaching serait rétrogradée en notification haute priorité de toute façon. Le canal `CRITIQUE` porte donc importance maximale, vibration et contournement du mode Ne pas déranger — c'est la lecture forcée réellement atteignable.
 - [x] WorkManager : rappel de pesée quotidien, vérification d'escalade, déclenchement du job hebdo (Phase 3).
 - [x] Checklist d'auto-critique `DESIGN.md` §11 passée sur chaque écran livré (résultats en §9).
 
-**Définition de fini** : atteinte pour §7.1–§7.2, §7.5–§7.6, alimentés par de vraies données `core-data`/`core-domain`. §7.4 reste ouvert, en attente de la décision sur la capture de la technique.
+**Définition de fini** : atteinte. Tous les écrans téléphone existent, alimentés par de vraies données `core-data`/`core-domain`, et passent la checklist §11.
 
 ---
 
@@ -136,11 +136,11 @@ Livrée en deux temps, le fournisseur du relais vocal n'étant pas tranché.
 
 - [x] Tile de pesée rapide (saisie manuelle 1 tap) — `DESIGN.md` §7.3.
 - [x] Complication affichant l'écart au poids cible, tap → ouvre la pesée du jour.
-- [ ] Écran de séance active sur la montre — reporté avec son équivalent téléphone, pour la même raison (capture de la technique propre, §11). En livrer une version montre avant que la question soit tranchée figerait le modèle de saisie deux fois.
+- [x] Écran de séance active sur la montre (`DESIGN.md` §7.3) : exercices du jour, réglage reps × charge au palier du râtelier, case « technique propre » par série, minuteur de repos de 90 s avec vibration. Le transport passe par la Data Layer, décrit dans `DEPLOYMENT.md` §12 : le téléphone publie la séance résolue (charge proposée et séries déjà loguées comprises), la montre renvoie chaque série avec sa position — ce qui rend un renvoi depuis la file d'attente inoffensif et donne la règle de fusion quand les deux écrans ont servi.
 - [x] `wear` dépend de `core-domain` seul, pas de `app`. **Correction du plan initial** : la ligne d'origine prévoyait aussi `core-data`. C'était une erreur — une base Room sur la montre serait une seconde source de vérité pour le poids, et il faudrait ensuite réconcilier deux historiques. La montre saisit, met en file d'attente (`PendingWeights`) et transmet au téléphone par la Data Layer ; le téléphone reste le seul à écrire en base. `core-domain` suffit pour partager les règles, qui sont pures.
 - [x] Cibles tactiles ≥ 48dp partout (`DESIGN.md` §10).
 
-**Définition de fini** : atteinte pour la Tile et la complication — un poids saisi sur la montre part vers le téléphone, qui l'écrit dans l'historique Room, et l'écart au poids cible revient sur le cadran. La seconde moitié (série saisie sur la montre déclenchant la double progression) suit l'écran de séance active.
+**Définition de fini** : atteinte. Un poids saisi sur la montre part vers le téléphone, qui l'écrit dans l'historique Room, et l'écart revient sur le cadran ; une série saisie sur la montre suit le même chemin et alimente la même règle de double progression que le téléphone, sans logique dupliquée — `core-domain` est le seul endroit où elle existe.
 
 ---
 
@@ -161,7 +161,7 @@ Cette phase n'ajoute pas de fonctionnalité — elle vérifie que l'ensemble fon
 
 **Dette d'outillage constatée en CI** : lint plante en analysant les sources de test de `app` — « Unexpected failure during lint analysis of `EscalationConvergenceTest.kt` (this is a bug in lint or one of the libraries it depends on) », résolution `RAW_FIR → SUPER_TYPES`. Le code compile et les tests passent ; c'est l'outil qui tombe. `app` pose donc `lint { ignoreTestSources = true }`, ce qui sort les sources de test du périmètre de lint **et rien d'autre** : lint garde toute sa sévérité sur ce qui est livré. À rouvrir à la prochaine montée d'AGP.
 
-**Définition de fini du MVP** : le test de convergence passe. Restent **hors du test** deux éléments qui ne dépendent pas du code livré : le client webhook du relais vocal (fournisseur à choisir, §11) et l'écran de séance active (saisie de série, §11). Le MVP n'est donc pas complet au sens de `SPEC.md` §9 tant que ces deux points ne sont pas tranchés.
+**Définition de fini du MVP** : le test de convergence passe. Reste **hors du test** un seul élément : le client webhook du relais vocal, qui attend le choix d'un fournisseur (§11). Le MVP n'est donc pas complet au sens de `SPEC.md` §9 tant que ce point n'est pas tranché — et tant que `plan.json` porte un contenu d'exemple.
 
 ---
 
@@ -176,9 +176,9 @@ Cette phase n'ajoute pas de fonctionnalité — elle vérifie que l'ensemble fon
 ## 11. Décisions à trancher avant/pendant l'implémentation (ne pas combler par défaut)
 
 - **Contenu réel du programme** (Phase 2, §4) : `SPEC.md` §5.1 suppose le plan nutrition/musculation pré-chargé, mais il n'est nulle part dans le repo. `core-data/src/main/assets/plan.json` porte un contenu d'exemple en version 0 pour que les écrans aient de quoi s'afficher. Fournir le vrai programme (en version 1) est la seule chose qui manque pour que la phase 2 soit réellement utile.
-- Modalité de saisie de la "technique propre" pour la double progression (Phase 1/5/6, §3).
+- ~~Modalité de saisie de la "technique propre" pour la double progression~~ — **tranché** : une case par série, cochée à la main, décochée par défaut. Un oubli coûte alors un palier non accordé ; l'inverse accorderait une montée de charge que personne n'a jugée méritée. La case reste modifiable après coup sur chaque série loguée.
 - **Nombre de prises quotidiennes** : `SPEC.md` §5.3 et `DESIGN.md` §7.1 en comptent six ("Repas restants : 2/6"), mais la checklist dessinée en `DESIGN.md` §7.2 n'en liste que cinq. `MealSlot` suit `SPEC.md` (six prises, la sixième nommée `COLLATION_3` faute de mieux) ; le libellé réel viendra du plan importé en phase 2, mais l'écart entre les deux documents est à trancher.
 - Mécanisme de notification `CRITIQUE` : `fullScreenIntent` vs notification haute priorité classique (Phase 5, §7).
 - Fournisseur du relais webhook Alexa : Notify-My-Alexa vs IFTTT Applet (Phase 4, §6 — détaillé dans `DEPLOYMENT.md` §11).
 
-Ces trois points sont volontairement laissés ouverts ici plutôt que tranchés par une supposition, conformément à `CLAUDE.md` §"Quand demander plutôt que supposer".
+Les points restants sont volontairement laissés ouverts ici plutôt que tranchés par une supposition, conformément à `CLAUDE.md` §"Quand demander plutôt que supposer".

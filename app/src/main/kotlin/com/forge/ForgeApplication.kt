@@ -6,6 +6,7 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.forge.core.data.plan.PlanImporter
 import com.forge.notification.ForgeNotifications
+import com.forge.wearlink.SessionPlanPublisher
 import com.forge.work.ForgeScheduler
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -17,9 +18,10 @@ import kotlinx.coroutines.launch
 /**
  * Point d'entrée de l'app téléphone.
  *
- * Trois choses au démarrage, toutes idempotentes : importer le plan s'il ne l'est pas déjà,
- * déclarer les canaux de notification, et programmer les travaux périodiques. Aucune n'a d'effet
- * la deuxième fois, donc un relancement ne réimporte rien et ne redécale aucun rappel.
+ * Quatre choses au démarrage, toutes idempotentes : importer le plan s'il ne l'est pas déjà,
+ * déclarer les canaux de notification, programmer les travaux périodiques, et publier la séance
+ * du jour vers la montre. Aucune n'a d'effet la deuxième fois, donc un relancement ne réimporte
+ * rien, ne redécale aucun rappel et ne duplique aucune séance.
  */
 @HiltAndroidApp
 class ForgeApplication : Application(), Configuration.Provider {
@@ -31,6 +33,8 @@ class ForgeApplication : Application(), Configuration.Provider {
     @Inject lateinit var notifications: ForgeNotifications
 
     @Inject lateinit var scheduler: ForgeScheduler
+
+    @Inject lateinit var sessionPublisher: SessionPlanPublisher
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -48,6 +52,10 @@ class ForgeApplication : Application(), Configuration.Provider {
                 // Un plan illisible ne doit pas empêcher l'app de démarrer : le suivi manuel
                 // reste possible, et l'erreur est tracée pour être corrigée.
                 .onFailure { Log.e(TAG, "Import du plan impossible", it) }
+
+            // La montre doit connaître la séance du jour dès la première ouverture du téléphone,
+            // sans attendre le réveil du lendemain matin.
+            sessionPublisher.publish()
         }
     }
 

@@ -30,6 +30,7 @@ class PlanCalendarSyncTest {
         override suspend fun workoutDays() = days
         override suspend fun meals() = mealList
         override suspend fun programWeekCount() = 0
+        override suspend fun availableLoadsKg() = emptyList<Float>()
     }
 
     private class RecordingCalendar(

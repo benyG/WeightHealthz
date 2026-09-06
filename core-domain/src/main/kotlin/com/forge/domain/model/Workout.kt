@@ -26,9 +26,12 @@ data class SetLog(
     val weightKg: Float,
     /**
      * Technique jugée propre sur cette série — exigée par la règle de double progression
-     * (CLAUDE.md). Sans valeur par défaut délibérément : la façon dont l'information est saisie
-     * à l'écran n'est pas tranchée (IMPLEMENTATION_PLAN.md §11), et un défaut à `true` la
-     * trancherait en douce en faveur de "propre sauf mention contraire".
+     * (CLAUDE.md).
+     *
+     * Toujours sans valeur par défaut, maintenant pour une autre raison : la saisie est tranchée
+     * (une case par série, cochée à la main), et c'est justement parce que le jugement vient de
+     * la personne qu'aucun défaut n'a de sens ici. L'écran part case décochée — un oubli coûte
+     * alors un palier non accordé, jamais un palier accordé sans l'avoir mérité.
      */
     val cleanTechnique: Boolean,
 )

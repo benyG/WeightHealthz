@@ -35,6 +35,7 @@ class WeeklyAnalysisServiceTest {
     private class FakeWorkouts(private val sessions: List<WorkoutSession> = emptyList()) : WorkoutRepository {
         override fun observeSession(date: LocalDate): Flow<WorkoutSession?> = flowOf(null)
         override suspend fun save(session: WorkoutSession) = Unit
+        override suspend fun delete(date: LocalDate) = Unit
         override suspend fun historyFor(exerciseName: String, since: LocalDate) = sessions
         override suspend fun sessionsBetween(from: LocalDate, to: LocalDate) =
             sessions.filter { it.date >= from && it.date <= to }
@@ -51,6 +52,7 @@ class WeeklyAnalysisServiceTest {
         override suspend fun workoutDays(): List<PlannedWorkoutDay> = emptyList()
         override suspend fun meals(): List<PlannedMeal> = emptyList()
         override suspend fun programWeekCount() = 0
+        override suspend fun availableLoadsKg() = emptyList<Float>()
     }
 
     private class RecordingAnalyses : WeeklyAnalysisRepository {

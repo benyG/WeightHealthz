@@ -47,6 +47,7 @@ import java.util.Locale
 fun HomeScreen(
     state: HomeUiState,
     onWeighIn: () -> Unit,
+    onOpenSession: () -> Unit,
     onOpenMeals: () -> Unit,
     onOpenAnalysis: () -> Unit,
     onOpenEcosystem: () -> Unit,
@@ -75,7 +76,7 @@ fun HomeScreen(
         ForgeRule()
         WeighInRow(state, onWeighIn)
         ForgeRule()
-        SessionRow(state)
+        SessionRow(state, onOpenSession)
         ForgeRule()
         MealsRow(state, onOpenMeals)
         ForgeRule()
@@ -162,18 +163,22 @@ private fun WeighInRow(state: HomeUiState, onWeighIn: () -> Unit) {
 }
 
 @Composable
-private fun SessionRow(state: HomeUiState) {
+private fun SessionRow(state: HomeUiState, onOpenSession: () -> Unit) {
+    val session = state.todaySession
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = TouchTarget)
+            // Un jour de repos n'ouvre rien : une ligne tapable qui mène à un écran vide dit
+            // qu'on a raté quelque chose.
+            .then(if (session != null) Modifier.clickable(onClick = onOpenSession) else Modifier)
             .padding(vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text("Séance", style = MaterialTheme.typography.bodyLarge, color = ForgeColors.Os)
         Text(
-            text = state.todaySession?.label ?: "repos",
+            text = session?.label ?: "repos",
             style = MaterialTheme.typography.bodyLarge,
             color = ForgeColors.SableEteint,
         )

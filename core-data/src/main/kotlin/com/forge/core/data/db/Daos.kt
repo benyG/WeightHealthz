@@ -68,6 +68,9 @@ interface WorkoutDao {
     /** Les exercices partent en cascade, ce qui évite d'accumuler les séries d'une saisie précédente. */
     @Query("DELETE FROM exercise_log WHERE sessionEpochDay = :epochDay")
     suspend fun deleteExercisesOf(epochDay: Long)
+
+    @Query("DELETE FROM workout_session WHERE epochDay = :epochDay")
+    suspend fun deleteSession(epochDay: Long)
 }
 
 @Dao

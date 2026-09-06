@@ -9,6 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.forge.domain.model.EscalationLevel
+import com.forge.work.EscalationNotifier
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,7 +30,7 @@ import javax.inject.Singleton
 @Singleton
 class ForgeNotifications @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : EscalationNotifier {
 
     fun ensureChannels() {
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
@@ -66,7 +67,7 @@ class ForgeNotifications @Inject constructor(
     }
 
     /** Ne poste rien si la permission n'est pas accordée — sans lever : ce n'est pas une panne. */
-    fun notifyEscalation(level: EscalationLevel, message: String) {
+    override fun notifyEscalation(level: EscalationLevel, message: String) {
         if (level == EscalationLevel.A_JOUR) return
         if (!canPost()) return
 

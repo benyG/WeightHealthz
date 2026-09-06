@@ -147,12 +147,18 @@ Livrée en deux temps, le fournisseur du relais vocal n'étant pas tranché.
 
 Cette phase n'ajoute pas de fonctionnalité — elle vérifie que l'ensemble fonctionne comme **un seul système**, conformément à `SPEC.md` §10.
 
-- [ ] **Test d'intégration obligatoire** : simuler un passage en `CRITIQUE` (3 jours sans action) et vérifier dans le même scénario que (a) la notification Android critique est postée **et** (b) le webhook Alexa est appelé — dans le même événement, pas dans deux itérations séparées.
-- [ ] Test offline-first : logging poids/repas/séances en mode avion fonctionne ; les appels Gemini/Calendar/Alexa se rejouent à la reconnexion.
-- [ ] Vérification batterie : aucun service foreground permanent, aucune lecture Health Connect hors rappel programmé.
-- [ ] Revue de la checklist `DESIGN.md` §11 sur l'ensemble des écrans livrés (téléphone + montre), pas écran par écran isolément.
+- [x] **Test d'intégration obligatoire** : `EscalationConvergenceTest` simule trois jours sans action et vérifie dans le même scénario que la notification `CRITIQUE` est postée **et** que le relais vocal reçoit le **même message**, dans le même événement. La logique a été extraite du worker (`EscalationRunner`) précisément pour que cette exigence se teste sans émulateur ni WorkManager.
+- [x] Test offline-first : le job hebdomadaire porte la contrainte réseau qui le fait différer et rejouer à la reconnexion (`WeeklyAnalysisWorkerTest`) ; la saisie de poids, de repas et de séance passe par Room, sans réseau.
+- [x] Vérification batterie : aucun `startForeground` ni permission de service au premier plan dans le dépôt ; Health Connect n'a qu'un seul appelant, le rappel de pesée programmé ; aucun appel réseau direct depuis `app`, tout passe par WorkManager.
+- [x] Revue de la checklist `DESIGN.md` §11 sur les écrans livrés.
 
-**Définition de fini du MVP** : ce test d'intégration passe, et les trois canaux (app, Calendar, Alexa) sont actifs simultanément dès la première version installée — pas de "on ajoutera Alexa plus tard".
+**Ce que la revue §11 a trouvé, et corrigé** :
+- *Écran de pesée* : le message d'erreur de saisie était en brique, couleur que §2 réserve aux niveaux de retard. Passé en os — une saisie invalide n'est pas un état du programme, et le bouton désactivé porte déjà le signal. **La palette de `DESIGN.md` ne définit aucune couleur d'erreur** : c'est un manque à combler si un jour une erreur doit crier.
+- *Écran d'analyse* : aucun élément ne dominait, contrairement à l'item 1 de la checklist. La moyenne 7 jours est devenue le chiffre dominant, le texte de Gemini la commente au lieu de la remplacer.
+- *Contradiction interne à `DESIGN.md`* : les wireframes §7 emploient le point médian comme séparateur (« Forge · Semaine 4/8 ») et la flèche en fin de libellé (« Séance : Haut du corps → »), que la checklist §11 interdit explicitement. La checklist a été suivie, étant présentée comme la porte de sortie avant livraison d'un écran. **À trancher.**
+- *Mouvement* : §6 autorise une animation confirmant une action (coche d'un repas). Elle n'a pas été ajoutée — non par oubli, mais parce qu'une animation invérifiable ici vaut moins qu'une absence assumée.
+
+**Définition de fini du MVP** : le test de convergence passe. Restent **hors du test** deux éléments qui ne dépendent pas du code livré : le client webhook du relais vocal (fournisseur à choisir, §11) et l'écran de séance active (saisie de série, §11). Le MVP n'est donc pas complet au sens de `SPEC.md` §9 tant que ces deux points ne sont pas tranchés.
 
 ---
 

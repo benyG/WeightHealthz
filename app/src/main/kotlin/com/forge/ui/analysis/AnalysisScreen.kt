@@ -54,7 +54,21 @@ fun AnalysisScreen(state: AnalysisUiState, modifier: Modifier = Modifier) {
             color = ForgeColors.SableEteint,
         )
 
-        VerticalSpace(24.dp)
+        // Un seul élément domine (DESIGN.md §5 et §11) : la mesure de la semaine. Le texte de
+        // Gemini la commente, il ne la remplace pas.
+        VerticalSpace(16.dp)
+        Text(
+            text = state.averageKg?.let { String.format(Locale.FRANCE, "%.1f kg", it) } ?: "—",
+            style = MaterialTheme.typography.displayLarge,
+            color = ForgeColors.Os,
+        )
+        Text(
+            text = "moyenne sur 7 jours",
+            style = MaterialTheme.typography.bodyMedium,
+            color = ForgeColors.SableEteint,
+        )
+
+        VerticalSpace(32.dp)
         Text(
             text = state.analysis.summaryText,
             style = MaterialTheme.typography.bodyLarge,
@@ -62,8 +76,6 @@ fun AnalysisScreen(state: AnalysisUiState, modifier: Modifier = Modifier) {
         )
 
         VerticalSpace(32.dp)
-        ForgeRule()
-        MeasureLine("Moyenne 7 jours", state.averageKg?.let { String.format(Locale.FRANCE, "%.1f kg", it) })
         ForgeRule()
         MeasureLine("Exercice à surveiller", state.analysis.focusExercise)
         ForgeRule()

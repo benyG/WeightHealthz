@@ -107,9 +107,13 @@ fun WeightEntryScreen(
             VerticalSpace(12.dp)
             Text(
                 // DESIGN.md §8 : dire le fait et l'action, sans ton d'excuse.
+                //
+                // En os et non en brique : §2 réserve la brique aux niveaux de retard, et la
+                // palette ne définit pas de couleur d'erreur. Une saisie invalide n'est pas un
+                // état du programme — le bouton désactivé porte déjà le signal.
                 text = "Poids hors des valeurs plausibles. Vérifie la saisie.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = ForgeColors.Brique,
+                color = ForgeColors.Os,
             )
         }
     }

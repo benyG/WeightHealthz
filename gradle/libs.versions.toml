@@ -12,6 +12,10 @@ activityCompose = "1.9.3"
 navigationCompose = "2.8.5"
 composeBom = "2024.12.01"
 wearCompose = "1.4.0"
+wearTiles = "1.4.1"
+protolayout = "1.2.1"
+watchfaceComplications = "1.2.1"
+playServicesWearable = "18.2.0"
 
 hilt = "2.52"
 hiltAndroidx = "1.2.0"
@@ -50,6 +54,13 @@ androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 
 androidx-wear-compose-material = { module = "androidx.wear.compose:compose-material", version.ref = "wearCompose" }
 androidx-wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "wearCompose" }
+androidx-wear-tiles = { module = "androidx.wear.tiles:tiles", version.ref = "wearTiles" }
+androidx-wear-protolayout = { module = "androidx.wear.protolayout:protolayout", version.ref = "protolayout" }
+androidx-wear-protolayout-expression = { module = "androidx.wear.protolayout:protolayout-expression", version.ref = "protolayout" }
+androidx-watchface-complications-datasource-ktx = { module = "androidx.wear.watchface:watchface-complications-data-source-ktx", version.ref = "watchfaceComplications" }
+play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
+kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", version.ref = "coroutines" }
 
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }

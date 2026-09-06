@@ -48,12 +48,11 @@ kotlin {
     }
 }
 
-// `wear` consomme les mêmes modules de cœur que `app` et ne dépend jamais de `app` :
-// les deux applications sont des consommateurs parallèles, pas l'une un plugin de l'autre
-// (IMPLEMENTATION_PLAN.md §8). Tiles et complications arrivent en phase 6.
+// La montre ne dépend que de `core-domain`, et surtout PAS de `core-data` : une base Room sur la
+// montre serait une seconde source de vérité sans stratégie de fusion. Le téléphone reste la
+// source, la montre lui parle par la Data Layer (DEPLOYMENT.md §12).
 dependencies {
     implementation(project(":core-domain"))
-    implementation(project(":core-data"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -65,6 +64,17 @@ dependencies {
 
     implementation(libs.androidx.wear.compose.material)
     implementation(libs.androidx.wear.compose.foundation)
+
+    implementation(libs.androidx.wear.tiles)
+    implementation(libs.androidx.wear.protolayout)
+    implementation(libs.androidx.wear.protolayout.expression)
+    implementation(libs.androidx.watchface.complications.datasource.ktx)
+
+    implementation(libs.play.services.wearable)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+    // `future { }` : la Tile répond par un ListenableFuture, le corps reste une coroutine.
+    implementation(libs.kotlinx.coroutines.guava)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)

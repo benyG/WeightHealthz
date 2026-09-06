@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.forge.core.data.health.HealthConnectWeightSource
 import com.forge.core.sync.calendar.CalendarSync
 import com.forge.core.sync.calendar.PlanCalendarSync
+import com.forge.core.sync.relay.RelayCredentials
 import com.forge.core.sync.relay.VoiceRelay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -34,8 +35,12 @@ enum class ChannelStatus {
 data class OnboardingUiState(
     val healthConnect: ChannelStatus = ChannelStatus.NOT_CONNECTED,
     val calendar: ChannelStatus = ChannelStatus.NOT_CONNECTED,
-    val voiceRelay: ChannelStatus = ChannelStatus.UNAVAILABLE,
+    val voiceRelay: ChannelStatus = ChannelStatus.NOT_CONNECTED,
     val calendarEventsCreated: Int? = null,
+    /** La saisie du code d'accès est dépliée, ou non. */
+    val relayCodeVisible: Boolean = false,
+    /** Résultat de l'annonce de test, en clair — c'est le seul retour qu'on ait sur ce canal. */
+    val relayTest: String? = null,
 )
 
 @HiltViewModel
@@ -44,6 +49,7 @@ class OnboardingViewModel @Inject constructor(
     private val healthConnectSource: HealthConnectWeightSource,
     private val planCalendarSync: PlanCalendarSync,
     private val voiceRelay: VoiceRelay,
+    private val relayCredentials: RelayCredentials,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingUiState())
@@ -68,7 +74,7 @@ class OnboardingViewModel @Inject constructor(
                     voiceRelay = if (voiceRelay.isConfigured()) {
                         ChannelStatus.CONNECTED
                     } else {
-                        ChannelStatus.UNAVAILABLE
+                        ChannelStatus.NOT_CONNECTED
                     },
                 )
             }
@@ -90,6 +96,44 @@ class OnboardingViewModel @Inject constructor(
                         ChannelStatus.NOT_CONNECTED
                     },
                     calendarEventsCreated = (result as? CalendarSync.Result.Synced)?.created,
+                )
+            }
+        }
+    }
+
+    /** Déplie la saisie du code d'accès du relais vocal. */
+    fun revealRelayCode() {
+        _state.update { it.copy(relayCodeVisible = true, relayTest = null) }
+    }
+
+    /**
+     * Enregistre le code, puis fait parler l'enceinte tout de suite.
+     *
+     * L'annonce de test n'est pas un gadget : c'est le seul canal de Forge dont on ne peut pas
+     * vérifier l'arrivée depuis l'écran. Sans elle, on croirait le relais connecté jusqu'au
+     * premier passage en RETARD_2, c'est-à-dire au pire moment pour découvrir qu'il ne l'est pas.
+     */
+    fun connectRelay(accessCode: String) {
+        viewModelScope.launch {
+            relayCredentials.store(accessCode)
+
+            val result = voiceRelay.announce("Forge est connecté à cette enceinte.")
+            _state.update {
+                it.copy(
+                    voiceRelay = if (result is VoiceRelay.RelayResult.Delivered) {
+                        ChannelStatus.CONNECTED
+                    } else {
+                        ChannelStatus.NOT_CONNECTED
+                    },
+                    relayCodeVisible = result !is VoiceRelay.RelayResult.Delivered,
+                    relayTest = when (result) {
+                        is VoiceRelay.RelayResult.Delivered ->
+                            "Annonce envoyée. L'enceinte doit la dire maintenant."
+                        is VoiceRelay.RelayResult.NotConfigured ->
+                            "Code vide. Colle le code reçu par courriel après avoir activé la skill."
+                        is VoiceRelay.RelayResult.Failed ->
+                            "Le service a refusé l'annonce (${result.reason}). Vérifie le code."
+                    },
                 )
             }
         }

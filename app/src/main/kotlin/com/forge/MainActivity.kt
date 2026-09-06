@@ -142,6 +142,8 @@ private fun ForgeApp(modifier: Modifier = Modifier) {
                         arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR),
                     )
                 },
+                onRevealRelayCode = viewModel::revealRelayCode,
+                onConnectRelay = viewModel::connectRelay,
             )
         }
     }

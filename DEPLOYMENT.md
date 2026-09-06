@@ -154,7 +154,15 @@ Pour une app mono-utilisateur installée sur un téléphone déjà connecté à 
 | **Notify-My-Alexa** | Service tiers dédié à la notification vocale Alexa via une simple requête HTTP | Dépendance à la disponibilité continue d'un service tiers de niche |
 | **IFTTT Applet** | Webhook IFTTT → action Alexa "Annoncer" | Compte IFTTT (gratuit avec limites, ou payant selon le nombre d'automatisations actives) |
 
-Ce choix engage un compte externe et une URL de webhook à traiter comme un secret. Contrairement aux clés API du §4, cette URL n'est **pas** dans `BuildConfig` : elle est saisie à l'onboarding (`SPEC.md` §5.1) et stockée dans les préférences de l'app — elle peut ainsi changer sans rebuild et ne se retrouve pas figée dans l'APK. Le fournisseur reste **à trancher avec l'utilisateur avant d'implémenter `core-sync`** (Phase 4 de `IMPLEMENTATION_PLAN.md`), conformément à `CLAUDE.md` §"Quand demander plutôt que supposer".
+**Décision : Notify My Alexa.** Implémenté par `NotifyMyAlexaRelay` (`core-sync`), un POST JSON vers `https://api.notifymyecho.com/v1/NotifyMe` portant le message et le code d'accès. Le choix reste réversible sans toucher au reste de l'app : `VoiceRelay` est l'interface, en changer ne modifie qu'une liaison Hilt.
+
+Le code d'accès n'est **pas** dans `BuildConfig` comme les clés du §4 : c'est un secret de compte, pas de build. Il est saisi à l'onboarding (`SPEC.md` §5.1) et stocké dans les préférences privées de l'app — il change ainsi sans rebuild et ne part pas dans l'APK. Non chiffré, délibérément : le code fait parler une enceinte, il ne donne accès à aucune donnée, et un chiffrement dont la clé vit sur le même appareil n'ajouterait qu'une dépendance.
+
+Deux points à retenir pour l'exploitation :
+- **Le client HTTP du relais est distinct de celui de `core-ai`.** Celui de Gemini ajoute la clé API à chaque requête qu'il porte ; le réutiliser enverrait cette clé à un service tiers. La séparation est marquée par les qualifieurs `@RelayHttpClient` et `@RelayEndpoint`.
+- **Aucun rejeu différé**, contrairement à l'analyse hebdomadaire. Une annonce est une alerte datée : « trois jours sans rien faire » criée deux jours plus tard est fausse. Un échec est tracé, pas mis en file.
+
+**Ce qui n'est pas encore relayé** : `SPEC.md` §5.8 prévoit aussi la voix pour les rappels de repas et de séance à heure fixe. `EscalationRelay.relayScheduledReminder` existe et est testé, mais rien ne l'appelle : Forge ne poste pas ces rappels lui-même, ils viennent des événements d'agenda. Les faire aussi passer par l'enceinte demande de décider si l'on veut être annoncé à chaque créneau du programme — une question de confort, pas de technique.
 
 ---
 

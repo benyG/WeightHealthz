@@ -35,7 +35,8 @@ kotlin {
 }
 
 // Aucun secret dans ce module : l'agenda passe par le fournisseur du système (aucun jeton
-// OAuth), et l'URL du webhook vocal sera saisie à l'onboarding (SPEC.md §5.1), pas compilée.
+// OAuth), et le code d'accès du relais vocal est saisi à l'onboarding (SPEC.md §5.1), stocké
+// dans les préférences de l'app — jamais compilé dans l'APK (DEPLOYMENT.md §11).
 dependencies {
     implementation(project(":core-domain"))
 
@@ -48,4 +49,7 @@ dependencies {
 
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
+    // Le relais vocal est un client HTTP : un serveur local est la seule façon d'en vérifier
+    // le corps de requête et le traitement des codes de retour sans appeler le vrai service.
+    testImplementation(libs.okhttp.mockwebserver)
 }

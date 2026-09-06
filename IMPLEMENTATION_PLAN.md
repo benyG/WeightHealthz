@@ -100,9 +100,9 @@ Aucune UI, aucune persistance réelle avant que ces règles existent et soient t
 
 ## 6. Phase 4 — `core-sync` : Google Calendar + relais Alexa
 
-Livrée en deux temps, le fournisseur du relais vocal n'étant pas tranché.
+Livrée en deux temps : l'agenda d'abord, la voix une fois son fournisseur tranché.
 
-**Temps 1 — fait**
+**Temps 1**
 
 - [x] Écriture des événements séances/repas dans l'agenda à l'onboarding, idempotente (marquage `CUSTOM_APP_PACKAGE`/`CUSTOM_APP_URI` : relancer l'onboarding constate les événements déjà posés au lieu d'en créer d'autres).
 - [x] `core-sync` réagit aux événements de la machine d'escalade de `core-domain` sans dupliquer la logique d'état : c'est `EscalationLevel.requiresVoiceRelay` qui décide, ici on ne fait qu'obéir.
@@ -111,11 +111,11 @@ Livrée en deux temps, le fournisseur du relais vocal n'étant pas tranché.
 
 **Écart assumé** : l'agenda passe par `CalendarContract` et non par l'API Google Calendar en OAuth prévue par `SPEC.md` §3. Comparatif, justification et condition de retour en arrière dans `DEPLOYMENT.md` §9. Isolé derrière `CalendarSync`, donc réversible en une classe.
 
-**Temps 2 — en attente d'une décision**
+**Temps 2**
 
-- [ ] Client webhook du relais vocal, une fois le fournisseur choisi (Notify-My-Alexa ou IFTTT, `DEPLOYMENT.md` §11). En attendant, `UnconfiguredVoiceRelay` journalise ce qui aurait été annoncé — le brancher se réduira à une ligne dans `SyncModule`, tout le reste de l'app parlant déjà à l'interface.
+- [x] Client webhook du relais vocal : **Notify My Alexa** (`DEPLOYMENT.md` §11). Le code d'accès se saisit à l'onboarding et l'écran envoie une annonce de test dans la foulée — c'est le seul canal dont l'écran ne peut pas constater l'arrivée autrement.
 
-**Définition de fini** : atteinte pour l'agenda. Pour la voix, l'interface et la logique sont vérifiées ; seul l'appel réseau réel manque.
+**Définition de fini** : atteinte. L'agenda pose les événements du programme, l'enceinte reçoit les passages en `RETARD_2` et `CRITIQUE`. Reste hors périmètre, faute d'une décision de confort : relayer aussi les rappels de repas et de séance à heure fixe (`DEPLOYMENT.md` §11).
 
 ---
 
@@ -161,7 +161,7 @@ Cette phase n'ajoute pas de fonctionnalité — elle vérifie que l'ensemble fon
 
 **Dette d'outillage constatée en CI** : lint plante en analysant les sources de test de `app` — « Unexpected failure during lint analysis of `EscalationConvergenceTest.kt` (this is a bug in lint or one of the libraries it depends on) », résolution `RAW_FIR → SUPER_TYPES`. Le code compile et les tests passent ; c'est l'outil qui tombe. `app` pose donc `lint { ignoreTestSources = true }`, ce qui sort les sources de test du périmètre de lint **et rien d'autre** : lint garde toute sa sévérité sur ce qui est livré. À rouvrir à la prochaine montée d'AGP.
 
-**Définition de fini du MVP** : le test de convergence passe. Reste **hors du test** un seul élément : le client webhook du relais vocal, qui attend le choix d'un fournisseur (§11). Le MVP n'est donc pas complet au sens de `SPEC.md` §9 tant que ce point n'est pas tranché — et tant que `plan.json` porte un contenu d'exemple.
+**Définition de fini du MVP** : le test de convergence passe et tous les canaux sont branchés. Ce qui reste ne dépend plus du code : le contenu réel du programme (`plan.json` est un exemple en version 0), les clés API à fournir, et la vérification sur appareils réels — aucun test automatisé ne peut constater qu'une enceinte a parlé ni qu'une montre a vibré.
 
 ---
 
@@ -179,6 +179,7 @@ Cette phase n'ajoute pas de fonctionnalité — elle vérifie que l'ensemble fon
 - ~~Modalité de saisie de la "technique propre" pour la double progression~~ — **tranché** : une case par série, cochée à la main, décochée par défaut. Un oubli coûte alors un palier non accordé ; l'inverse accorderait une montée de charge que personne n'a jugée méritée. La case reste modifiable après coup sur chaque série loguée.
 - **Nombre de prises quotidiennes** : `SPEC.md` §5.3 et `DESIGN.md` §7.1 en comptent six ("Repas restants : 2/6"), mais la checklist dessinée en `DESIGN.md` §7.2 n'en liste que cinq. `MealSlot` suit `SPEC.md` (six prises, la sixième nommée `COLLATION_3` faute de mieux) ; le libellé réel viendra du plan importé en phase 2, mais l'écart entre les deux documents est à trancher.
 - Mécanisme de notification `CRITIQUE` : `fullScreenIntent` vs notification haute priorité classique (Phase 5, §7).
-- Fournisseur du relais webhook Alexa : Notify-My-Alexa vs IFTTT Applet (Phase 4, §6 — détaillé dans `DEPLOYMENT.md` §11).
+- ~~Fournisseur du relais webhook Alexa~~ — **tranché** : Notify My Alexa (`DEPLOYMENT.md` §11).
+- Faut-il relayer par la voix les rappels de repas et de séance à heure fixe, en plus des passages en retard ? `SPEC.md` §5.8 le prévoit ; c'est une question de confort — être annoncé à chaque créneau du programme, ou seulement quand ça dérape.
 
 Les points restants sont volontairement laissés ouverts ici plutôt que tranchés par une supposition, conformément à `CLAUDE.md` §"Quand demander plutôt que supposer".

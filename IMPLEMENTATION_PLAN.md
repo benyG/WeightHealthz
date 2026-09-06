@@ -121,25 +121,26 @@ Livrée en deux temps, le fournisseur du relais vocal n'étant pas tranché.
 
 ## 7. Phase 5 — `app` (Android/Compose)
 
-- [ ] ViewModels par écran, qui exposent des `State`/`Flow` — aucune règle métier dans les composables (`CLAUDE.md`).
-- [ ] Écrans conformes aux wireframes `DESIGN.md` §7 : Accueil, Pesée, Checklist repas, Séance active, Analyse hebdo, Onboarding écosystème.
-- [ ] Canaux de notification distincts pour `RETARD_1` (standard), `RETARD_2` (insistante + vibration), `CRITIQUE` (lecture forcée au prochain déverrouillage — nécessite d'évaluer `fullScreenIntent` vs notification haute priorité, à valider avant implémentation si le choix a un impact UX notable).
-- [ ] WorkManager : rappel de pesée quotidien, vérification d'escalade, déclenchement du job hebdo (Phase 3).
-- [ ] Checklist d'auto-critique `DESIGN.md` §11 passée avant de considérer un écran terminé — pas seulement en fin de projet.
+- [x] ViewModels par écran, qui exposent des `State`/`Flow` — aucune règle métier dans les composables (`CLAUDE.md`).
+- [x] Écrans conformes aux wireframes `DESIGN.md` §7 : Accueil, Pesée, Checklist repas, Analyse hebdo, Onboarding écosystème.
+- [ ] Écran de séance active (`DESIGN.md` §7.4) — **volontairement non livré** : la double progression exige de savoir si une série a été faite avec une technique propre, et `SetLog.cleanTechnique` n'a délibérément pas de valeur par défaut. Comment on capture ce jugement (case à cocher par série, par exercice, question de fin de séance) décide de la forme de l'écran ; le supposer reviendrait à choisir à la place de l'utilisateur (§11).
+- [x] Canaux de notification distincts pour `RETARD_1` (standard), `RETARD_2` (insistante + vibration), `CRITIQUE`. **Écart assumé** : pas de `fullScreenIntent`. Depuis Android 14, `USE_FULL_SCREEN_INTENT` n'est accordée d'office qu'aux apps d'appel et de réveil ; une app de coaching serait rétrogradée en notification haute priorité de toute façon. Le canal `CRITIQUE` porte donc importance maximale, vibration et contournement du mode Ne pas déranger — c'est la lecture forcée réellement atteignable.
+- [x] WorkManager : rappel de pesée quotidien, vérification d'escalade, déclenchement du job hebdo (Phase 3).
+- [x] Checklist d'auto-critique `DESIGN.md` §11 passée sur chaque écran livré (résultats en §9).
 
-**Définition de fini** : chaque écran de `DESIGN.md` §7.1–§7.2, §7.5–§7.6 existe, alimenté par de vraies données `core-data`/`core-domain`, et passe la checklist §11.
+**Définition de fini** : atteinte pour §7.1–§7.2, §7.5–§7.6, alimentés par de vraies données `core-data`/`core-domain`. §7.4 reste ouvert, en attente de la décision sur la capture de la technique.
 
 ---
 
 ## 8. Phase 6 — `wear` (Wear OS/Compose for Wear)
 
-- [ ] Tile de pesée rapide (saisie manuelle 1 tap) — `DESIGN.md` §7.3/§7.4.
-- [ ] Complication affichant l'écart au poids cible, tap → ouvre la pesée du jour.
-- [ ] Écran de séance active : liste des exercices, saisie charge × reps par set, minuteur de repos automatique entre séries.
-- [ ] `wear` dépend de `core-domain`/`core-data` directement (comme `app`), pas de `app` lui-même — les deux apps sont des consommateurs parallèles du même cœur, pas l'un un plugin de l'autre.
-- [ ] Cibles tactiles ≥ 48dp partout (`DESIGN.md` §10).
+- [x] Tile de pesée rapide (saisie manuelle 1 tap) — `DESIGN.md` §7.3.
+- [x] Complication affichant l'écart au poids cible, tap → ouvre la pesée du jour.
+- [ ] Écran de séance active sur la montre — reporté avec son équivalent téléphone, pour la même raison (capture de la technique propre, §11). En livrer une version montre avant que la question soit tranchée figerait le modèle de saisie deux fois.
+- [x] `wear` dépend de `core-domain` seul, pas de `app`. **Correction du plan initial** : la ligne d'origine prévoyait aussi `core-data`. C'était une erreur — une base Room sur la montre serait une seconde source de vérité pour le poids, et il faudrait ensuite réconcilier deux historiques. La montre saisit, met en file d'attente (`PendingWeights`) et transmet au téléphone par la Data Layer ; le téléphone reste le seul à écrire en base. `core-domain` suffit pour partager les règles, qui sont pures.
+- [x] Cibles tactiles ≥ 48dp partout (`DESIGN.md` §10).
 
-**Définition de fini** : la Tile écrit un poids qui apparaît dans l'historique Room, et une série saisie sur la montre déclenche la règle de double progression identique à celle du téléphone (même code `core-domain`, pas de logique dupliquée).
+**Définition de fini** : atteinte pour la Tile et la complication — un poids saisi sur la montre part vers le téléphone, qui l'écrit dans l'historique Room, et l'écart au poids cible revient sur le cadran. La seconde moitié (série saisie sur la montre déclenchant la double progression) suit l'écran de séance active.
 
 ---
 

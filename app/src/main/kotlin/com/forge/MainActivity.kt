@@ -28,6 +28,8 @@ import com.forge.ui.meals.MealsScreen
 import com.forge.ui.meals.MealsViewModel
 import com.forge.ui.onboarding.OnboardingScreen
 import com.forge.ui.onboarding.OnboardingViewModel
+import com.forge.ui.session.SessionScreen
+import com.forge.ui.session.SessionViewModel
 import com.forge.ui.theme.ForgeColors
 import com.forge.ui.theme.ForgeTheme
 import com.forge.ui.weight.WeightEntryScreen
@@ -57,6 +59,7 @@ private object Routes {
     const val HOME = "accueil"
     const val WEIGHT = "pesee"
     const val MEALS = "repas"
+    const val SESSION = "seance"
     const val ANALYSIS = "analyse"
     const val ONBOARDING = "onboarding"
 }
@@ -76,6 +79,7 @@ private fun ForgeApp(modifier: Modifier = Modifier) {
             HomeScreen(
                 state = state,
                 onWeighIn = { navController.navigate(Routes.WEIGHT) },
+                onOpenSession = { navController.navigate(Routes.SESSION) },
                 onOpenMeals = { navController.navigate(Routes.MEALS) },
                 onOpenAnalysis = { navController.navigate(Routes.ANALYSIS) },
                 onOpenEcosystem = { navController.navigate(Routes.ONBOARDING) },
@@ -91,6 +95,18 @@ private fun ForgeApp(modifier: Modifier = Modifier) {
                     viewModel.save(it)
                     navController.popBackStack()
                 },
+            )
+        }
+
+        composable(Routes.SESSION) {
+            val viewModel: SessionViewModel = hiltViewModel()
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            SessionScreen(
+                state = state,
+                onSelectExercise = viewModel::select,
+                onLogSet = viewModel::logSet,
+                onToggleTechnique = viewModel::toggleTechnique,
+                onUndoLastSet = viewModel::undoLastSet,
             )
         }
 

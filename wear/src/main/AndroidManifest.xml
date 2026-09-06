@@ -4,6 +4,9 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
 
+    <!-- Fin du minuteur de repos : entre deux séries, personne ne regarde l'écran. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:name=".ForgeWearApplication"
         android:allowBackup="false"
@@ -28,6 +31,23 @@
             android:name=".ui.WeighInActivity"
             android:exported="true"
             android:label="Pesée"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.DeviceDefault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            Deuxième entrée au lanceur, à côté de la pesée. La séance et la pesée sont deux gestes
+            sans rapport, à deux moments de la journée : les empiler derrière un même écran
+            d'accueil ferait payer un tap à chaque fois pour éviter un icône.
+        -->
+        <activity
+            android:name=".ui.SessionActivity"
+            android:exported="true"
+            android:label="Séance"
             android:taskAffinity=""
             android:theme="@android:style/Theme.DeviceDefault">
             <intent-filter>

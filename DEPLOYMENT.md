@@ -164,6 +164,17 @@ Ce choix engage un compte externe et une URL de webhook à traiter comme un secr
 - En développement, sideload direct vers la montre via `adb connect` en Wi-Fi (la Pixel Watch 2 supporte le débogage sans fil) — pas besoin de câble USB dédié à la montre.
 - Aucune dépendance réseau propre à `wear` : elle communique avec `app` via la Data Layer API (sync locale Bluetooth/Wi-Fi), et fonctionne pour la saisie de base (pesée, séance) même si le téléphone est temporairement hors de portée, la sync se faisant dès reconnexion.
 
+**Sens du trafic, et pourquoi il est asymétrique.** La montre ne dépend que de `core-domain` : elle n'a ni base, ni plan, ni historique. Le partage se lit donc dans un seul sens à la fois :
+
+| Sens | Mécanisme | Contenu | Comportement hors de portée |
+|---|---|---|---|
+| Téléphone → montre | `DataClient` (donnée persistée par le système) | Écart au poids cible ; séance du jour, charge proposée et séries déjà loguées comprises | La dernière valeur reçue reste lisible — c'est ce qui fait tenir une séance en salle |
+| Montre → téléphone | `MessageClient` (message ponctuel) | Une pesée ; une série | Mise en file d'attente locale, rejouée au prochain contact |
+
+Le contrat des deux sens vit dans `core-domain/link/` (`WearLink`), en fonctions pures : c'est le seul module que les deux applications partagent, et un format recopié des deux côtés finirait par diverger d'un côté.
+
+**Ce qui rend un renvoi inoffensif.** Une pesée est identifiée par `(jour, source)`, une série par sa position dans son exercice. Rejouer la file d'attente corrige donc la même ligne au lieu d'en ajouter une seconde — c'est aussi la règle de fusion quand la séance a été commencée sur un écran et poursuivie sur l'autre : la dernière écriture sur une position donnée gagne.
+
 ---
 
 ## 13. Versioning, migrations et rollback

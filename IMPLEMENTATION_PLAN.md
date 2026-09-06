@@ -136,11 +136,11 @@ Livrée en deux temps, le fournisseur du relais vocal n'étant pas tranché.
 
 - [x] Tile de pesée rapide (saisie manuelle 1 tap) — `DESIGN.md` §7.3.
 - [x] Complication affichant l'écart au poids cible, tap → ouvre la pesée du jour.
-- [ ] Écran de séance active sur la montre (`DESIGN.md` §7.3) et minuteur de repos. La question de la technique propre est tranchée, celle du transport ne l'est pas : `wear` ne dépend pas de `core-data`, donc une séance saisie sur la montre doit remonter au téléphone par la Data Layer comme les pesées, avec une file d'attente hors de portée et une règle de fusion quand les deux écrans ont servi. C'est ce transport qui reste à concevoir, pas l'écran.
+- [x] Écran de séance active sur la montre (`DESIGN.md` §7.3) : exercices du jour, réglage reps × charge au palier du râtelier, case « technique propre » par série, minuteur de repos de 90 s avec vibration. Le transport passe par la Data Layer, décrit dans `DEPLOYMENT.md` §12 : le téléphone publie la séance résolue (charge proposée et séries déjà loguées comprises), la montre renvoie chaque série avec sa position — ce qui rend un renvoi depuis la file d'attente inoffensif et donne la règle de fusion quand les deux écrans ont servi.
 - [x] `wear` dépend de `core-domain` seul, pas de `app`. **Correction du plan initial** : la ligne d'origine prévoyait aussi `core-data`. C'était une erreur — une base Room sur la montre serait une seconde source de vérité pour le poids, et il faudrait ensuite réconcilier deux historiques. La montre saisit, met en file d'attente (`PendingWeights`) et transmet au téléphone par la Data Layer ; le téléphone reste le seul à écrire en base. `core-domain` suffit pour partager les règles, qui sont pures.
 - [x] Cibles tactiles ≥ 48dp partout (`DESIGN.md` §10).
 
-**Définition de fini** : atteinte pour la Tile et la complication — un poids saisi sur la montre part vers le téléphone, qui l'écrit dans l'historique Room, et l'écart au poids cible revient sur le cadran. La seconde moitié (série saisie sur la montre déclenchant la double progression) attend le transport décrit ci-dessus.
+**Définition de fini** : atteinte. Un poids saisi sur la montre part vers le téléphone, qui l'écrit dans l'historique Room, et l'écart revient sur le cadran ; une série saisie sur la montre suit le même chemin et alimente la même règle de double progression que le téléphone, sans logique dupliquée — `core-domain` est le seul endroit où elle existe.
 
 ---
 
@@ -161,7 +161,7 @@ Cette phase n'ajoute pas de fonctionnalité — elle vérifie que l'ensemble fon
 
 **Dette d'outillage constatée en CI** : lint plante en analysant les sources de test de `app` — « Unexpected failure during lint analysis of `EscalationConvergenceTest.kt` (this is a bug in lint or one of the libraries it depends on) », résolution `RAW_FIR → SUPER_TYPES`. Le code compile et les tests passent ; c'est l'outil qui tombe. `app` pose donc `lint { ignoreTestSources = true }`, ce qui sort les sources de test du périmètre de lint **et rien d'autre** : lint garde toute sa sévérité sur ce qui est livré. À rouvrir à la prochaine montée d'AGP.
 
-**Définition de fini du MVP** : le test de convergence passe. Restent **hors du test** deux éléments : le client webhook du relais vocal, qui attend le choix d'un fournisseur (§11), et la séance active sur la montre, qui attend la conception du transport des séries vers le téléphone (§8). Le MVP n'est donc pas complet au sens de `SPEC.md` §9 tant que ces deux points ne sont pas réglés.
+**Définition de fini du MVP** : le test de convergence passe. Reste **hors du test** un seul élément : le client webhook du relais vocal, qui attend le choix d'un fournisseur (§11). Le MVP n'est donc pas complet au sens de `SPEC.md` §9 tant que ce point n'est pas tranché — et tant que `plan.json` porte un contenu d'exemple.
 
 ---
 

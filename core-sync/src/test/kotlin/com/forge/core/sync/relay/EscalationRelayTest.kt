@@ -13,6 +13,7 @@ class EscalationRelayTest {
 
     private class RecordingRelay : VoiceRelay {
         val announced = mutableListOf<String>()
+        override fun isConfigured() = true
         override suspend fun announce(message: String): VoiceRelay.RelayResult {
             announced += message
             return VoiceRelay.RelayResult.Delivered
@@ -81,6 +82,7 @@ class EscalationRelayTest {
     @Test
     fun `un relais non configure ne fait pas echouer l escalade`() = runTest {
         val silent = object : VoiceRelay {
+            override fun isConfigured() = false
             override suspend fun announce(message: String) = VoiceRelay.RelayResult.NotConfigured
         }
 

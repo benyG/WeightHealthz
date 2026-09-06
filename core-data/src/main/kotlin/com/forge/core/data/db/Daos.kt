@@ -104,6 +104,9 @@ abstract class PlanDao {
     @Query("SELECT * FROM plan_target ORDER BY weekIndex")
     abstract suspend fun allTargets(): List<PlanTargetEntity>
 
+    @Query("SELECT COUNT(*) FROM plan_target")
+    abstract suspend fun targetCount(): Int
+
     @Transaction
     @Query("SELECT * FROM planned_workout_day ORDER BY position")
     abstract suspend fun workoutDays(): List<PlannedDayWithExercises>

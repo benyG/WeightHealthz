@@ -150,4 +150,6 @@ class RoomPlanRepository @Inject constructor(
     override suspend fun workoutDays(): List<PlannedWorkoutDay> = dao.workoutDays().map { it.toDomain() }
 
     override suspend fun meals(): List<PlannedMeal> = dao.meals().map { it.toDomain() }
+
+    override suspend fun programWeekCount(): Int = dao.targetCount()
 }

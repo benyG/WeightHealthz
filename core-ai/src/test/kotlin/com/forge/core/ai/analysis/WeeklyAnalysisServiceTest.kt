@@ -50,6 +50,7 @@ class WeeklyAnalysisServiceTest {
         override suspend fun programStartDate() = start
         override suspend fun workoutDays(): List<PlannedWorkoutDay> = emptyList()
         override suspend fun meals(): List<PlannedMeal> = emptyList()
+        override suspend fun programWeekCount() = 0
     }
 
     private class RecordingAnalyses : WeeklyAnalysisRepository {

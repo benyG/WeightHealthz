@@ -29,6 +29,7 @@ class PlanCalendarSyncTest {
         override suspend fun programStartDate(): LocalDate? = null
         override suspend fun workoutDays() = days
         override suspend fun meals() = mealList
+        override suspend fun programWeekCount() = 0
     }
 
     private class RecordingCalendar(

@@ -76,4 +76,7 @@ interface PlanRepository {
 
     /** Prises quotidiennes du programme, dans l'ordre chronologique indicatif. */
     suspend fun meals(): List<PlannedMeal>
+
+    /** Durée du programme en semaines — le "sur 8" de "Semaine 4 sur 8" (DESIGN.md §7.1). */
+    suspend fun programWeekCount(): Int
 }

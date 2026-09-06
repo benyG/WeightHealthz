@@ -15,6 +15,13 @@ interface VoiceRelay {
 
     suspend fun announce(message: String): RelayResult
 
+    /**
+     * Le relais est-il utilisable ? Question posée séparément de [announce] à dessein : sonder
+     * l'état en annonçant un message vide ferait réellement parler l'enceinte le jour où un vrai
+     * relais est branché.
+     */
+    fun isConfigured(): Boolean
+
     sealed interface RelayResult {
         data object Delivered : RelayResult
 

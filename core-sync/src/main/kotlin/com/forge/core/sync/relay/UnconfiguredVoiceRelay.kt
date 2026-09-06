@@ -15,6 +15,8 @@ import javax.inject.Singleton
 @Singleton
 class UnconfiguredVoiceRelay @Inject constructor() : VoiceRelay {
 
+    override fun isConfigured(): Boolean = false
+
     override suspend fun announce(message: String): VoiceRelay.RelayResult {
         Log.i(TAG, "Relais vocal non configuré, message non transmis : \"$message\"")
         return VoiceRelay.RelayResult.NotConfigured

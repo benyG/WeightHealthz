@@ -19,7 +19,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.future.future
+import kotlinx.coroutines.guava.future
 
 /**
  * Tile de pesée rapide (SPEC.md §5.2, DESIGN.md §7.4).

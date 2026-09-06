@@ -102,6 +102,9 @@ class RoomWorkoutRepository @Inject constructor(
         }
     }
 
+    /** Les exercices et leurs séries suivent en cascade. */
+    override suspend fun delete(date: LocalDate) = dao.deleteSession(date.toEpochDay())
+
     override suspend fun historyFor(exerciseName: String, since: LocalDate): List<WorkoutSession> =
         dao.sessionsWithExercise(exerciseName, since.toEpochDay()).map { it.toDomain() }
 
@@ -152,4 +155,8 @@ class RoomPlanRepository @Inject constructor(
     override suspend fun meals(): List<PlannedMeal> = dao.meals().map { it.toDomain() }
 
     override suspend fun programWeekCount(): Int = dao.targetCount()
+
+    /** Liste vide tant qu'aucun plan n'est importé : un râtelier inventé proposerait de faux paliers. */
+    override suspend fun availableLoadsKg(): List<Float> =
+        dao.metadata(PlanMetadataEntity.SINGLETON_ID)?.availableLoadsKg ?: emptyList()
 }

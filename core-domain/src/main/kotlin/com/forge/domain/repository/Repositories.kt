@@ -40,6 +40,13 @@ interface WorkoutRepository {
 
     suspend fun save(session: WorkoutSession)
 
+    /**
+     * Efface la séance du jour. Nécessaire parce qu'une séance sans aucun exercice ne doit pas
+     * exister : sa seule présence ferait compter la journée comme tenue par le moteur d'escalade,
+     * alors que rien n'y a été fait. Défaire sa dernière série efface donc la séance.
+     */
+    suspend fun delete(date: LocalDate)
+
     /** Séances contenant [exerciseName], depuis [since] — matière première de la stagnation. */
     suspend fun historyFor(exerciseName: String, since: LocalDate): List<WorkoutSession>
 
@@ -79,4 +86,11 @@ interface PlanRepository {
 
     /** Durée du programme en semaines — le "sur 8" de "Semaine 4 sur 8" (DESIGN.md §7.1). */
     suspend fun programWeekCount(): Int
+
+    /**
+     * Charges réellement disponibles sur le matériel, dans l'ordre du plan. Sans elles, la
+     * suggestion de palier de SPEC.md §5.4 n'a rien à proposer : liste vide tant qu'aucun plan
+     * n'est importé.
+     */
+    suspend fun availableLoadsKg(): List<Float>
 }

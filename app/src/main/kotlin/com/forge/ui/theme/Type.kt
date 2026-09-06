@@ -1,6 +1,7 @@
 package com.forge.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -23,7 +24,11 @@ val ZillaSlab = FontFamily(
 /**
  * IBM Plex Sans est livré en fonte variable : une seule ressource, deux graisses obtenues par
  * l'axe `wght`.
+ *
+ * `variationSettings` est encore marquée expérimentale dans Compose ; l'opt-in est explicite et
+ * circonscrit à cette déclaration, pas posé au niveau du module.
  */
+@OptIn(ExperimentalTextApi::class)
 val IbmPlexSans = FontFamily(
     Font(
         R.font.ibm_plex_sans,
